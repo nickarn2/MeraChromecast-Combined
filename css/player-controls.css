@@ -1,0 +1,47 @@
+.controls {
+    margin-top: 30px;
+    display: none; /*default*/
+    font-size: 0; /*fixes whitespaces between inline-block elements*/
+}
+
+.controls .progress-bar {
+    position: relative;
+    height: 4px;
+    background: rgb(200, 200, 200);/*the same as media desc (artist, album)*/
+}
+
+.progress-bar .progress {
+    width: 0;
+    height: 4px;
+    background: rgb(0, 0, 0);
+    overflow: hidden;
+}
+
+.progress-bar .tick {
+    position: absolute;
+    left: -1px;
+    top: -4px;
+
+    height: 13px;
+    width: 2px;
+    background: rgb(255, 0, 0);
+
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.controls .progress-bar,
+.controls .curtime,
+.controls .durtime {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.controls .curtime,
+.controls .durtime {
+    font-size: 16pt;
+}
+
+.controls .curtime { padding-right: 10px; text-align: right; }
+.controls .durtime { padding-left: 10px;}

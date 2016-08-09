@@ -1,0 +1,85 @@
+<!doctype>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" type="text/css" href="css/player-controls.css">
+        <title>Verizon Synchronoss App</title>
+    </head>
+    <body>
+        <div id="headband" class="fullpage-bg">
+            <div class="header-headband">
+                <div class="logo">
+                    <div class="logo-name"> VERIZON </div>
+                    <div class="logo-icon"> <span> &#10004; </span> </div>
+                </div>
+            </div>
+            <div class="content-headband">
+                <div class="headband">
+                    <div class="content-welcome">
+                        <div>
+                            <img src="./images/cloud-logo.svg">
+                            <div class="content-welcome-title"> Welcome to Cloud View </div>
+                            <div class="content-welcome-text"> Now that you are connected, just select some photos, videos or songs to enjoy on your TV. </div>
+                        </div>
+                    </div>
+                    <div class="content-device">
+                        <img src="./images/device-example.svg">
+                    </div>
+                </div>
+                <div class="loading">
+                    <div class="loading-cloud-logo">
+                        <div> <img src="./images/cloud-logo.svg"> </div>
+                        <div> <span> Cloud View </span> </div>
+                    </div>
+                    <div class="loading-loader"> </div>
+                    <div class="loading-text"> Loading, please wait... </div>
+                </div>
+            </div>
+        </div>
+        <div id="picture-container" class="fullscreen-picture">
+            <div id="picture"></div>
+            <div id="msg" class="centeredY"></div>
+        </div>
+        <div id="video-thumbnail">
+            <div class="video-thumbnail"> </div>
+            <div class="play-button"> </div>
+        </div>
+        <div id="player-container">
+            <video id="vid" class="fullscreen" autoplay loop></video>
+
+            <div class="info-box">
+                <div class="artwork"></div>
+                <div class="info">
+                    <span class="title threeDots"></span><br>
+                    <span class="desc threeDots"></span>
+                </div>
+
+                <div class="controls">
+                    <div class="curtime">0:00</div>
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                        <div class="tick"></div>
+                    </div>
+                    <div class="durtime">0:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="overlay">
+            <div id="cast-msg" class="centeredY"></div>
+        </div>
+
+        <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+        <!--
+            exif.js : vendor library
+            we've modified error handling: ref to comments with prefix *Modified*
+        -->
+        <script src="libs/exif.js"></script>
+
+        <script src="js/config.js"></script>
+        <script src="js/utils.js"></script>
+        <script src="js/mediaPlayer.js"></script>
+        <script src="js/httpService.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>
