@@ -22,7 +22,7 @@ body {
 .fullpage-bg {
     background-color: #f6f6f6;
     width: 100%;
-    height: 100vh;
+    height: 100%;
 }
 #headband {
     display: none;
@@ -33,12 +33,12 @@ body {
 .header-headband {
     background-color: #ffffff;
     width: 100%;
-    height: 70px;
+    height: 14%;
 }
 .header-headband .logo {
     display: table;
-    width: 194.1px;
     height: 100%;
+    margin-left: 6%;
 }
 .header-headband .logo > * {
     display: table-cell;
@@ -46,131 +46,106 @@ body {
 }
 .header-headband .logo .logo-name {
     text-transform: lowercase;
-    text-align: right;
     font-weight: bold;
-    font-size: 35px;
-    color: #000000;
+    font-size: 3em;
+    color: #000;
 }
 .header-headband .logo .logo-icon span {
     display: inline-block;
-    margin-bottom: 15px;
-    font-size: 25px;
+    margin: 0 0 0.7em -0.2em;
+    font-size: 2.3em;
     color: #cd040b;
 }
 .content-headband {
     display: table;
-    position: absolute;
-    top: 0;
+    position: relative;
     width: 100%;
-    height: 100%;
-    padding-top: 70px;
+    height: 86%;
 }
 .content-headband > div {
     display: none;
 }
 .content-headband > div.displayed {
     display: table-cell !important;
-    vertical-align: middle;
 }
 .content-headband .headband .content-welcome {
     float: left;
     width: 50%;
+    height: 100%;
 }
 .content-headband .headband .content-welcome > div {
     float: right;
-    width: 304px;
-    height: auto;
-    padding: 45px 43px 0 0;
+    width: 59%;
+    height: 57%;
+    padding: 21% 8% 22% 0;
     text-align: center;
 }
 .content-headband .headband .content-welcome img {
     object-fit: contain;
-    width: 96px;
-    height: 96px;
+    width: 32%;
 }
 .content-headband .headband .content-welcome .content-welcome-title {
-    width: 241px;
-    height: 30px;
-    margin: 60px auto 12px auto;
-    text-align: center;
+    width: 100%;
+    margin: 12% 0 2% 0;
     line-height: 1.43;
     font-family: NHaasGroteskTXStd-75Bd;
     font-weight: 400;
-    font-size: 21px;
+    font-size: 1.8em;
     color: #cd040b;
 }
 .content-headband .headband .content-welcome .content-welcome-text {
-    width: 304px;
-    height: 90px;
-    text-align: center;
+    width: 100%;
     line-height: 1.67;
     font-family: NHaasGroteskTXStd-65Md;
     font-weight: 400;
-    font-size: 18px;
-    color: #333333;
+    font-size: 1.5em;
+    color: #333;
 }
 .content-headband .headband .content-device {
     float: right;
     width: 50%;
+    height: 100%;
 }
 .content-headband .headband .content-device > img {
     object-fit: contain;
-    width: 177px;
-    height: 361px;
-    padding-left: 100px;
+    width: 32%;
+    padding: 12% 0 0 20%;
 }
 .content-headband .loading > div {
-    width: 218px;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
 }
 .content-headband .loading .loading-cloud-logo {
-    height: 48px;
-    margin-top: 60px;
-}
-.content-headband .loading .loading-cloud-logo > div:first-child {
-    float: left;
-    width: 67.5px;
-    height: 100%;
-    text-align: right;
-}
-.content-headband .loading .loading-cloud-logo > div:last-child {
-    float: right;
-    width: 132.5px;
-    height: 100%;
-    padding-left: 18px;
-    text-align: left;
+    height: 37%;
+    padding-top: 5%;
+    text-align: center;
 }
 .content-headband .loading .loading-cloud-logo img {
     object-fit: contain;
-    width: 48px;
-    height: 48px;
+    width: 5%;
 }
 .content-headband .loading .loading-cloud-logo span {
     display: inline-block;
-    padding-top: 9px;
-    line-height: 1.25;
+    vertical-align: top;
+    margin-left: 2%;
+    line-height: 2.7;
     font-family: NHaasGroteskTXStd-75Bd;
     font-weight: 400;
-    font-size: 24px;
+    font-size: 1.5em;
     color: #cd040b;
 }
 .content-headband .loading-loader {
     background: url('../images/ajax-loader.gif') no-repeat;
-    background-size: 100px 100px;
+    background-size: auto 100%;
     background-position: center;
-    width: 100px;
-    height: 100px;
-    margin-top: 87px;
+    height: 20%;
 }
 .content-headband .loading .loading-text {
-    width: 218px;
-    height: 26px;
-    margin-top: 78px;
+    height: 43%;
+    padding-top: 8%;
     text-align: center;
     font-family: NHaasGroteskTXStd-65Md;
     font-weight: 400;
-    font-size: 21px;
+    font-size: 1.3em;
     color: #262626;
 }
 /* Connected & Connected Loading pages (end) */
@@ -208,7 +183,7 @@ body {
     background: #fff;
     opacity: 0.8;
     border-radius: 0.8em;
-    padding: 0.5em 2.5em;
+    padding: 2.5% 7%;
 }
 /* Messages (end) */
 
@@ -242,18 +217,17 @@ body {
 }
 
 .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-
     text-align: center;
-    font-size: 30pt;
-    color: #000;
-
-    position: absolute;
-    left: 0;
-    top: 0;
+    font-family: NHaasGroteskTXStd-65Md;
+    font-weight: 400;
+    font-size: 2em;
+    color: #333;
 }
-
 .overlay .centeredY {
     padding: 0;
     margin-top: 100px;
@@ -304,4 +278,3 @@ body {
 .info .desc {
     color: rgb(200, 200, 200);/*grey*/
 }
-

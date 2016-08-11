@@ -345,6 +345,7 @@ function onReadyToPlay(e) {
                 Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), stateObj);
                 Utils.ui.initPlayerStyles();
                 Utils.ui.updatePlayerCurtimeLabel();
+                displayHeader(); // display a header with Verizon logo
                 break;
         }
     }
@@ -663,6 +664,15 @@ function onWaiting() {
         };
         Utils.sendMessageToSender(senderId, message);
     }
+}
+
+/**
+ * Display a header with Verizon logo.
+ *
+ * @return {undefined} Result: displaying a header.
+ */
+function displayHeader() {
+    headband.classList.add('displayed');
 }
 
 /**
