@@ -33,13 +33,14 @@ function MediaPlayer(config) {
          * 3) Check if lastcurrenttime !== 0 and current time became 0 (video is going to be repeated)
          * 4) Pause video, call onEnded function and turn on silenceMode which prevents informing sender app about playback status
          *
-         * If you want to loop video: fakeLoop = player.loop && false
-         * If you want to back to the previous behaviour please remove loop attr from video tag (index.html)
+         * If you want to loop video: player.loop && false
+         * If you want to back to the previous behaviour please remove loop attr from video obj - player (main.js)
          */
-        fakeLoop = player.loop && true,
+        isFakeLoop = function() {
+            console.log(APP_INFO, TAG, EXTRA_TAG, 'fakeLoop', player.loop && true);
+            return player.loop && true;
+        },
         silenceMode = false;
-
-    console.log(APP_INFO, TAG, EXTRA_TAG, 'fakeLoop', fakeLoop);
 
     function isSilenceMode() {
         if (silenceMode) console.log(APP_INFO, TAG, EXTRA_TAG, 'Silence mode is turned on.');
@@ -49,10 +50,6 @@ function MediaPlayer(config) {
     var MediaPlayer = {
         state: STATE[0],
         lastcurrenttime: 0,
-        init: function() {
-            if ( !player ) return;
-            this.registerEvents();
-        },
         /**
          * Start media playback.
          *
@@ -61,10 +58,11 @@ function MediaPlayer(config) {
          */
         play: function(url) {
             if (!player || !url) return;
+            var me = this;
 
             console.log(APP_INFO, TAG, EXTRA_TAG, 'play:', url);
-            silenceMode = false;
-            this.registerEvents();
+            me.turnOffSilenceMode();
+            me.registerEvents();
             player.src = url;
         },
         /**
@@ -75,7 +73,7 @@ function MediaPlayer(config) {
         stop: function() {
             if ( !player ) return;
             var me = this;
-            silenceMode = false;
+            me.turnOffSilenceMode();
 
             if (player.src && player.src.length) {
                 console.log(APP_INFO, TAG, EXTRA_TAG, 'stop playback:', player.src);
@@ -159,6 +157,24 @@ function MediaPlayer(config) {
             player.removeEventListener('waiting', onWaiting, false);
             player.removeEventListener('ended', onEnded, false);
             player.removeEventListener('error', onError, false);
+        },
+        /**
+         * Turn off silence mode.
+         *
+         * @return {undefined} Result: turn off silence mode.
+         */
+        turnOffSilenceMode: function() {
+            silenceMode = false;
+            console.log('silenceMode', silenceMode);
+        },
+        /**
+         * Turn on silence mode.
+         *
+         * @return {undefined} Result: turn on silence mode.
+         */
+        turnOnSilenceMode: function() {
+            silenceMode = true;
+            console.log('silenceMode', silenceMode);
         }
     }
 
@@ -274,20 +290,25 @@ function MediaPlayer(config) {
         document.dispatchEvent(onSuspend);
     }
 
-    function onTimeUpdate(e) {
+    /**
+     * Function callback when HTML5 Video "timeupdate" event fired.
+     *
+     * @return {undefined} Result: dispatch of "gc:timeupdate" event for document and some actions with player.
+     */
+    function onTimeUpdate() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: timeupdate: currentTime:", player.currentTime);
-        if ( fakeLoop && MediaPlayer.lastcurrenttime !== 0 && player.currentTime == 0 ) {
+        if ( isFakeLoop() && MediaPlayer.lastcurrenttime !== 0 && player.currentTime == 0 ) {
             console.log(APP_INFO, TAG, EXTRA_TAG, 'fake end');
             //NOTE: if loop == true -> ended event won't be fired
             //Hence take it as an end of the video
             player.pause();
-            onEnded();
-            silenceMode = true;
+            MediaPlayer.turnOnSilenceMode();
+            onEnded(); // function callback when HTML5 Video "ended" event fired
         }
         MediaPlayer.lastcurrenttime = player.currentTime;
         if (isSilenceMode()) return;
 
-        var onTimeUpdate = new CustomEvent('gc:timeupdate', {detail: {currentTime: player.currentTime}});
+        var onTimeUpdate = new CustomEvent('gc:timeupdate', {detail: {currentTime: player.currentTime, duration: player.duration}});
         document.dispatchEvent(onTimeUpdate);
     }
 
@@ -304,7 +325,12 @@ function MediaPlayer(config) {
         document.dispatchEvent(onWaiting);
     }
 
-    function onEnded(e) {
+    /**
+     * Function callback when HTML5 Video "ended" event fired.
+     *
+     * @return {undefined} Result: dispatch of "gc:ended" event for document.
+     */
+    function onEnded() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: ended");
         var onEnded = new CustomEvent('gc:ended');
         document.dispatchEvent(onEnded);

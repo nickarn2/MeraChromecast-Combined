@@ -66,6 +66,7 @@ window.onload = function() {
 
             if ( event == "LOAD_START" ) {
                 if ( !stateObj.media ) return;
+                stateObj.loadStarted = false;
 
                 console.log(APP_INFO, TAG, type);
                 switch( type ) {
@@ -83,7 +84,6 @@ window.onload = function() {
                         break;
                 }
             } else if ( event == "RESUME" || event == "PAUSE" ) {
-                displayThumbnail(false); // display a thumbnail
                 playPause(event); // control of a video playback
             }
         } catch (event) {
@@ -106,7 +106,7 @@ function clearStage(options) {
     msg.style.display = "none";
     castMsg.innerHTML = "";
 
-    Utils.ui.updatePlayerCurtimeLabel.stop();
+    Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
     playerContainer.style.display = "none";
     playerContainer.removeAttribute("poster");
     playerContainer.querySelector(".artwork").style.backgroundImage = "";
@@ -117,8 +117,9 @@ function clearStage(options) {
     pictureContainer.style.display = "block";
     picture.style.backgroundImage = "";
     picture.style.backgroundSize = "contain";
-    displayHeadband(false); // display a headband screen
-    displayLoading(false); // display a loading screen
+    displayHeadband(false); // don't display a headband screen
+    displayLoading(false); // don't display a loading screen
+    displayThumbnail(false);  // don't display a thumbnail
 
     if (!options || options.showLoader) displayLoading(true); // display a loading screen
 }
@@ -270,6 +271,7 @@ function playPause(event) {
         clearStage(); // reset a screen state by default
         httpService.stop(); // cancel current HTTP-query
         player.stop(); // stop media playback
+        if (stateObj.media && stateObj.media.type == "AUDIO") playerEl.loop = false;
         player.play(stateObj.media.url); // start media playback
     } else if (event == 'PAUSE' || event == 'RESUME') {
         console.log("Current view", Utils.ui.viewManager.getRecentViewInfo().mode);
@@ -598,14 +600,21 @@ function onTimeupdate(e) {
     var type = stateObj.media && stateObj.media.type;
     if (type =='AUDIO') {
         if (!stateObj.media && !stateObj.media.duration) return;
+        if (stateObj.media.duration != e.detail.duration) {
+            console.log(APP_INFO, TAG, 'Duration has updated. Prev value: ', stateObj.media.duration, '. Cur value: ', e.detail.duration);
+            //Possible fix for VZMERA-79
+            Utils.ui.updatePlayerStyles(e.detail.duration);
+        }
 
         var progressBarWidth = document.querySelector("#player-container .controls .progress-bar").offsetWidth,
             progress = document.querySelector("#player-container .controls .progress"),
             tick = document.querySelector("#player-container .controls .tick"),
-            value = Math.floor( e.detail.currentTime * progressBarWidth / stateObj.media.duration );
+            value = Math.floor( e.detail.currentTime * progressBarWidth / e.detail.duration );
 
         progress.style.width = value + "px";
         tick.style.left = (value-1) + "px";// 1 - half of tick's width, minus to center element horizontally
+
+        stateObj.media.duration = e.detail.duration;
     }
 
     /* Send messages to Sender app*/
@@ -637,9 +646,21 @@ function onVolumechange(e) {
     }
 }
 
+/**
+ * Function callback when "gc:ended" event fired.
+ *
+ * @return {undefined} Result: performing some actions for each content type.
+ */
 function onEnded() {
     var type = stateObj.media && stateObj.media.type;
-    if (type =='AUDIO') Utils.ui.updatePlayerCurtimeLabel.stop();
+    switch (type) {
+        case 'AUDIO':
+            Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
+            break;
+        case 'VIDEO':
+            displayThumbnail(true, null, true); // display a thumbnail
+            break;
+    }
 
     /* Send messages to Sender app*/
     if (senderId) {
@@ -650,8 +671,6 @@ function onEnded() {
         };
         Utils.sendMessageToSender(senderId, message);
     }
-
-    if (type == 'VIDEO') displayThumbnail(true, null, true); // display a thumbnail
 }
 
 function onWaiting() {
@@ -739,6 +758,7 @@ function displayThumbnail(flag, secure, cache) {
     clearStage({showLoader: false}); // reset a screen state by default
     pictureContainer.style.display = 'none';
     player.stop(); // stop media playback
+    playerEl.loop = true;
     videoThumbnail.classList.add(disp);
     if (!cache) {
         videoThumbnail.querySelector('.video-thumbnail').style.backgroundImage = '';

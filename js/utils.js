@@ -58,6 +58,27 @@ var Utils = (function(){
     }
 
     /**
+     * Update styles for player's custom controls if duration has changed
+     * @method updatePlayerStyles
+     * @memberof module:Utils
+     * @access public
+     * @returns {undefined}
+     */
+    function updatePlayerStyles(duration) {
+        var playerContainer = document.getElementById('player-container'),
+            durLabel = playerContainer.querySelector(".controls .durtime"),
+            progressBar = playerContainer.querySelector('.controls .progress-bar'),
+            controlsWidth = Math.ceil(playerContainer.offsetHeight / 2);
+
+        var timeStrUpdated = Utils.getTimeStr(duration);
+        durLabel.innerHTML = timeStrUpdated;
+
+        var durLabelWidth = durLabel.scrollWidth;
+        durLabel.style.width = durLabelWidth + "px";
+        progressBar.style.width = controlsWidth - durLabelWidth*2 + "px";
+    }
+
+    /**
      * Update current time label for player's custom controls
      * @method updatePlayerCurtimeLabel
      * @memberof module:Utils
@@ -65,7 +86,7 @@ var Utils = (function(){
      * @returns {undefined}
      */
     function updatePlayerCurtimeLabel() {
-        updatePlayerCurtimeLabel.stop();
+        updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
 
         //Init html elements
         updatePlayerCurtimeLabel.video = document.querySelector('#player-container #vid');
@@ -85,6 +106,12 @@ var Utils = (function(){
     updatePlayerCurtimeLabel.video = undefined;
     updatePlayerCurtimeLabel.curtimeLabel = undefined;
     updatePlayerCurtimeLabel.interval = undefined;
+
+    /**
+     * Update current time label when playback is stopped.
+     *
+     * @return {undefined} Result: updating current time label, removing interval and clearing variables.
+     */
     updatePlayerCurtimeLabel.stop = function() {
         console.log(APP_INFO, TAG, 'updatePlayerCurtimeLabel: stop updating if it is in progress (interval!=undefined): interval:', this.interval);
         if (!this.interval) return;
@@ -289,6 +316,11 @@ var Utils = (function(){
             * Apply initial styles for player's custom controls
             */
             initPlayerStyles: initPlayerStyles,
+
+            /**
+            * Update styles for player's custom controls if duration has changed
+            */
+            updatePlayerStyles: updatePlayerStyles,
 
             /**
             * Update current time label for player's custom controls
