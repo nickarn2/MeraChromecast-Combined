@@ -241,6 +241,7 @@ function displayImage() {
         console.log(APP_INFO, TAG, 'e', e);
 
         displayLoading(false); // display a loading screen
+        displayHeader();
         msg.innerHTML = e.detail && e.detail.msg || FAILED_TO_LOAD_MSG;
         msg.style.display = 'block';
 
@@ -267,6 +268,7 @@ function displayImage() {
  */
 function playPause(event) {
     if (!stateObj.loadStarted) {
+        console.log(APP_INFO, '!loadStarted');
         stateObj.loadStarted = true;
         clearStage(); // reset a screen state by default
         httpService.stop(); // cancel current HTTP-query
@@ -275,7 +277,12 @@ function playPause(event) {
         player.play(stateObj.media.url); // start media playback
     } else if (event == 'PAUSE' || event == 'RESUME') {
         console.log("Current view", Utils.ui.viewManager.getRecentViewInfo().mode);
-        if (Utils.ui.viewManager.getRecentViewInfo().mode !== 'media-player') return;
+        
+        var COMMAND_NOT_VALID = 
+            Utils.ui.viewManager.getRecentViewInfo().mode !== 'media-player' &&
+            !stateObj.loadStarted;
+            
+        if (COMMAND_NOT_VALID) return;
 
         console.log("pause/resume - proceed");
         player.pauseResume(event); // control of a video playback
@@ -335,7 +342,6 @@ function onAbort() {
 function onReadyToPlay(e) {
     console.log(APP_INFO, TAG, 'onReadyToPlay: ', e);
     var media = stateObj.media;
-    castMsg.innerHTML = "";
 
     Utils.ui.viewManager.setView('media-player');
 
@@ -400,6 +406,7 @@ function onErrorPlaying(e) {
     console.log(APP_INFO, TAG, 'onErrorPlaying: ', e);
 
     clearStage({showLoader: false}); // reset a screen state by default
+    displayHeader();
 
     msg.innerHTML = e.detail && e.detail.msg || e.detail.desc || FAILED_TO_LOAD_MSG;
     msg.style.display = 'block';
