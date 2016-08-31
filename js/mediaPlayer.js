@@ -23,7 +23,7 @@ function MediaPlayer(config) {
             1: "Fetching process aborted by user",//MEDIA_ERR_ABORTED
             2: "Error occurred when downloading",//MEDIA_ERR_NETWORK
             3: "Error occurred when decoding",//MEDIA_ERR_DECODE
-            4: "Audio/video not supported"//MEDIA_ERR_SRC_NOT_SUPPORTED
+            4: "There was an issue casting your content. Please try again."//MEDIA_ERR_SRC_NOT_SUPPORTED
         },
         /*
          * This var is used to fix VZMERA-26 (fails to play video after black screen issue - VZMERA-25)
