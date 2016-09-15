@@ -48,20 +48,20 @@ body {
 }
 
 /* @2x Images (Pixel Ratio of 1.25+) */
-@media (-o-min-device-pixel-ratio: 5/4),
-       (-webkit-min-device-pixel-ratio: 1.25),
-       (min--moz-device-pixel-ratio: 1.25),
-       (min-device-pixel-ratio: 1.25),
-       (min-resolution: 1.25dppx) {
+@media  (-o-min-device-pixel-ratio: 5/4),
+        (-webkit-min-device-pixel-ratio: 1.25),
+        (min--moz-device-pixel-ratio: 1.25),
+        (min-device-pixel-ratio: 1.25),
+        (min-resolution: 1.25dppx) {
     .header-headband .logo {background-image:url('../images/vz-logo@2x.png');}
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
-@media (-o-min-device-pixel-ratio: 9/4),
-       (-webkit-min-device-pixel-ratio: 2.25),
-       (min--moz-device-pixel-ratio: 2.25),
-       (min-device-pixel-ratio: 2.25),
-       (min-resolution: 2.25dppx) {
+@media  (-o-min-device-pixel-ratio: 9/4),
+        (-webkit-min-device-pixel-ratio: 2.25),
+        (min--moz-device-pixel-ratio: 2.25),
+        (min-device-pixel-ratio: 2.25),
+        (min-resolution: 2.25dppx) {
     .header-headband .logo {background-image:url('../images/vz-logo@3x.png');}
 }
 
@@ -98,7 +98,7 @@ body {
     margin: 12% 0 2% 0;
     line-height: 1.43;
     font-family: NHaasGroteskTXStd-75Bd;
-    font-weight: 400;
+    font-weight: 600;
     font-size: 1.8em;
     color: #cd040b;
 }
@@ -106,7 +106,7 @@ body {
     width: 100%;
     line-height: 1.67;
     font-family: NHaasGroteskTXStd-65Md;
-    font-weight: 400;
+    font-weight: 600;
     font-size: 1.5em;
     color: #333;
 }
@@ -143,7 +143,7 @@ body {
     color: #cd040b;
 }
 .content-headband .loading-loader {
-    background: url('../images/ajax-loader.gif') no-repeat;
+    background: url('../images/spin.svg') no-repeat;
     background-size: auto 100%;
     background-position: center;
     height: 20%;
@@ -160,20 +160,21 @@ body {
 /* Connected & Connected Loading pages (end) */
 
 /* Video Thumbnail page (begin) */
-#video-thumbnail {
+#thumbnail {
     display: none;
     position: absolute;
     width: 100%;
     height: 100%;
 }
-#video-thumbnail .video-thumbnail {
+#thumbnail .thumbnail {
     width: 100%;
     height: 100%;
     background-position: 50% 50%;
     background-size: contain;
     background-repeat: no-repeat;
 }
-#video-thumbnail .play-button {
+#thumbnail .play-button {
+    display: none;
     background: url('../images/video-play.png') no-repeat;
     background-size: auto 18%;
     background-position: 50% 50%;
@@ -184,22 +185,35 @@ body {
     height: 100%;
     z-index: 9999;
 }
+#thumbnail .loading {
+    display: none;
+    width: 100%;
+    height: 86%;
+    position:absolute;
+    bottom: 0;
+}
+#thumbnail .loading-loader {
+    background: url('../images/spin.svg') no-repeat;
+    background-size: auto 100%;
+    background-position: center;
+    height: 20%;
+}
 /* @2x Images (Pixel Ratio of 1.25+) */
-@media (-o-min-device-pixel-ratio: 5/4),
-       (-webkit-min-device-pixel-ratio: 1.25),
-       (min--moz-device-pixel-ratio: 1.25),
-       (min-device-pixel-ratio: 1.25),
-       (min-resolution: 1.25dppx) {
-    #video-thumbnail .play-button {background:url('../images/video-play@2x.png') no-repeat;}
+@media  (-o-min-device-pixel-ratio: 5/4),
+        (-webkit-min-device-pixel-ratio: 1.25),
+        (min--moz-device-pixel-ratio: 1.25),
+        (min-device-pixel-ratio: 1.25),
+        (min-resolution: 1.25dppx) {
+    #thumbnail .play-button {background:url('../images/video-play@2x.png') no-repeat;}
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
-@media (-o-min-device-pixel-ratio: 9/4),
-       (-webkit-min-device-pixel-ratio: 2.25),
-       (min--moz-device-pixel-ratio: 2.25),
-       (min-device-pixel-ratio: 2.25),
-       (min-resolution: 2.25dppx) {
-    #video-thumbnail .play-button {background:url('../images/video-play@3x.png') no-repeat;}
+@media  (-o-min-device-pixel-ratio: 9/4),
+        (-webkit-min-device-pixel-ratio: 2.25),
+        (min--moz-device-pixel-ratio: 2.25),
+        (min-device-pixel-ratio: 2.25),
+        (min-resolution: 2.25dppx) {
+    #thumbnail .play-button {background:url('../images/video-play@3x.png') no-repeat;}
 }
 /* Video Thumbnail page (end) */
 

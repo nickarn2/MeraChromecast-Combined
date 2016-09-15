@@ -218,25 +218,18 @@ var Utils = (function(){
      */
     function getImageOrientation(source, cb) {
         console.log(APP_INFO, TAG, "getImageOrientation: ", source);
-        if (source instanceof window.ArrayBuffer) { getOri(source);
-        } else {
-            var image = new Image();
-            image.onload = function() {
-                getOri(image);
-            }
-            image.onerror = function() { cb(); }
-            image.src = source;
+        if ((source instanceof window.Image || source instanceof window.HTMLImageElement)
+            && source.exifdata) {
+            source.exifdata = null;
         }
 
-        function getOri(img) {
-            EXIF.getData(img, function() {
-                var exif = EXIF.getAllTags(this),
-                    ori = exif.Orientation;
-                console.log(APP_INFO, TAG, exif);
-                console.log(APP_INFO, TAG, "Orientation", ori);
-                cb(ori);
-            });
-        }
+        EXIF.getData(source, function () {
+            var exif = EXIF.getAllTags(this),
+                ori = exif.Orientation;
+            console.log(APP_INFO, TAG, exif);
+            console.log(APP_INFO, TAG, "Orientation", ori);
+            cb(ori);
+        });
     }
 
     /**
@@ -265,14 +258,13 @@ var Utils = (function(){
      * @returns {String}
      */
     function getTimeStr(secs) {
-        console.log(APP_INFO, TAG, 'getTimeStr: secs:', secs);
         if(!secs) return "0:00";
         var h = Math.floor(secs / 3600),
             m = Math.floor(secs % 3600 / 60),
             s = Math.floor(secs % 3600 % 60);
 
         var str = ((h > 0 ? h + ":" + (m < 10 ? "0" : "") : "") + m + ":" + (s < 10 ? "0" : "") + s);
-        console.log(APP_INFO, TAG, 'getTimeStr: return str:', str);
+        console.log(APP_INFO, TAG, 'getTimeStr: secs:', secs, ' return str:', str);
         return str;
     }
 
@@ -298,59 +290,49 @@ var Utils = (function(){
     return {
         ui: {
             /**
-            * Display artwork for media
-            */
+             * Display artwork for media
+             */
             setArtwork: setArtwork,
-
             /**
-            * Display media info (title, artist, album, etc.)
-            */
+             * Display media info (title, artist, album, etc.)
+             */
             setMediaInfo: setMediaInfo,
-
             /**
-            * Set css style and corresponding vendor prefixes
-            */
+             * Set css style and corresponding vendor prefixes
+             */
             setVendorStyle: setVendorStyle,
-
             /**
-            * Apply initial styles for player's custom controls
-            */
+             * Apply initial styles for player's custom controls
+             */
             initPlayerStyles: initPlayerStyles,
-
             /**
-            * Update styles for player's custom controls if duration has changed
-            */
+             * Update styles for player's custom controls if duration has changed
+             */
             updatePlayerStyles: updatePlayerStyles,
-
             /**
-            * Update current time label for player's custom controls
-            */
+             * Update current time label for player's custom controls
+             */
             updatePlayerCurtimeLabel: updatePlayerCurtimeLabel,
-
             /**
-            * Set, get current view - photo, media-player and etc
-            */
+             * Set, get current view - photo, media-player and etc
+             */
             viewManager: viewManager
         },
-
         /**
-        * Get image orientation using EXIF library
-        */
+         * Get image orientation using EXIF library
+         */
         getImageOrientation: getImageOrientation,
-
         /**
-        * Check if parameters has a list of headers || body parameters
-        */
+         * Check if parameters has a list of headers || body parameters
+         */
         isResourceSecure: isResourceSecure,
-
         /**
-        * Generate time string (Formats: h:mm:ss || m:ss)
-        */
+         * Generate time string (Formats: h:mm:ss || m:ss)
+         */
         getTimeStr: getTimeStr,
-
         /**
-        * Send message to client app
-        */
+         * Send message to client app
+         */
         sendMessageToSender: sendMessageToSender
     }
 

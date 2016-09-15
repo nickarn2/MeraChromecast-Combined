@@ -24,32 +24,10 @@ function MediaPlayer(config) {
             2: "Error occurred when downloading",//MEDIA_ERR_NETWORK
             3: "Error occurred when decoding",//MEDIA_ERR_DECODE
             4: "There was an issue casting your content. Please try again."//MEDIA_ERR_SRC_NOT_SUPPORTED
-        },
-        /*
-         * This var is used to fix VZMERA-26 (fails to play video after black screen issue - VZMERA-25)
-         * Workaround:
-         * 1) add loop attr to video tag
-         * 2) update lastcurrenttime on onTimeUpdate()
-         * 3) Check if lastcurrenttime !== 0 and current time became 0 (video is going to be repeated)
-         * 4) Pause video, call onEnded function and turn on silenceMode which prevents informing sender app about playback status
-         *
-         * If you want to loop video: player.loop && false
-         * If you want to back to the previous behaviour please remove loop attr from video obj - player (main.js)
-         */
-        isFakeLoop = function() {
-            console.log(APP_INFO, TAG, EXTRA_TAG, 'fakeLoop', player.loop && true);
-            return player.loop && true;
-        },
-        silenceMode = false;
-
-    function isSilenceMode() {
-        if (silenceMode) console.log(APP_INFO, TAG, EXTRA_TAG, 'Silence mode is turned on.');
-        return silenceMode;
-    }
+        };
 
     var MediaPlayer = {
         state: STATE[0],
-        lastcurrenttime: 0,
         /**
          * Start media playback.
          *
@@ -61,7 +39,6 @@ function MediaPlayer(config) {
             var me = this;
 
             console.log(APP_INFO, TAG, EXTRA_TAG, 'play:', url);
-            me.turnOffSilenceMode();
             me.registerEvents();
             player.src = url;
         },
@@ -73,13 +50,11 @@ function MediaPlayer(config) {
         stop: function() {
             if ( !player ) return;
             var me = this;
-            me.turnOffSilenceMode();
 
             if (player.src && player.src.length) {
                 console.log(APP_INFO, TAG, EXTRA_TAG, 'stop playback:', player.src);
                 player.pause();
                 me.state = STATE[0];
-                me.lastcurrenttime = 0;
                 me.unregisterEvents();
                 player.src = "";
                 player.load();//force buffering
@@ -157,24 +132,6 @@ function MediaPlayer(config) {
             player.removeEventListener('waiting', onWaiting, false);
             player.removeEventListener('ended', onEnded, false);
             player.removeEventListener('error', onError, false);
-        },
-        /**
-         * Turn off silence mode.
-         *
-         * @return {undefined} Result: turn off silence mode.
-         */
-        turnOffSilenceMode: function() {
-            silenceMode = false;
-            console.log('silenceMode', silenceMode);
-        },
-        /**
-         * Turn on silence mode.
-         *
-         * @return {undefined} Result: turn on silence mode.
-         */
-        turnOnSilenceMode: function() {
-            silenceMode = true;
-            console.log('silenceMode', silenceMode);
         }
     }
 
@@ -186,7 +143,6 @@ function MediaPlayer(config) {
 
     function onCanplay() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: canplay");
-        if (isSilenceMode()) return;
         onReadyToPlay = new CustomEvent('gc:canplay', {detail: {url: player.src}});
         document.dispatchEvent(onReadyToPlay);
 
@@ -195,70 +151,60 @@ function MediaPlayer(config) {
 
     function onCanplayThrough() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: canplaythrough");
-        if (isSilenceMode()) return;
         var onCanplayThrough = new CustomEvent('gc:canplaythrough');
         document.dispatchEvent(onCanplayThrough);
     }
 
     function onDurationChange() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: durationchange");
-        if (isSilenceMode()) return;
         var onDurationChange = new CustomEvent('gc:durationchange', {detail: {duration: player.duration}});
         document.dispatchEvent(onDurationChange);
     }
 
     function onLoadedData() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: loadeddata");
-        if (isSilenceMode()) return;
         var onLoadedData = new CustomEvent('gc:loadeddata');
         document.dispatchEvent(onLoadedData);
     }
 
     function onLoadedMetadata(e) {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: loadedmetadata: duration:", player.duration);
-        if (isSilenceMode()) return;
         var onLoadedMetadata = new CustomEvent('gc:loadedmetadata', {detail: {duration: player.duration}});
         document.dispatchEvent(onLoadedMetadata);
     }
 
     function onLoadstart() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: loadstart");
-        if (isSilenceMode()) return;
         var onLoadstart = new CustomEvent('gc:loadstart');
         document.dispatchEvent(onLoadstart);
     }
 
     function onPause() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: pause");
-        if (isSilenceMode()) return;
         var onPause = new CustomEvent('gc:pause');
         document.dispatchEvent(onPause);
     }
 
     function onPlay() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: play");
-        if (isSilenceMode()) return;
         var onPlay = new CustomEvent('gc:play');
         document.dispatchEvent(onPlay);
     }
 
     function onPlaying(e) {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: playing");
-        if (isSilenceMode()) return;
         var onPlaying = new CustomEvent('gc:playing');
         document.dispatchEvent(onPlaying);
     }
 
     function onProgress(e) {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: progress");
-        if (isSilenceMode()) return;
         var onProgress = new CustomEvent('gc:progress');
         document.dispatchEvent(onProgress);
     }
 
     function onRatechange() {
         console.log(APP_INFO, TAG, EXTRA_TAG, 'event: ratechange');
-        if (isSilenceMode()) return;
         var onRatechange = new CustomEvent('gc:ratechange', {detail: {playbackRate: player.playbackRate}});
         document.dispatchEvent(onRatechange);
     }
@@ -271,21 +217,18 @@ function MediaPlayer(config) {
 
     function onSeeking() {
         console.log(APP_INFO, TAG, EXTRA_TAG, 'event: seeking');
-        if (isSilenceMode()) return;
         var onSeeking = new CustomEvent('gc:seeking', {detail: {currentTime: player.currentTime}});
         document.dispatchEvent(onSeeking);
     }
 
     function onStalled() {
         console.log(APP_INFO, TAG, EXTRA_TAG, 'event: stalled');
-        if (isSilenceMode()) return;
         var onStalled = new CustomEvent('gc:stalled');
         document.dispatchEvent(onStalled);
     }
 
     function onSuspend() {
         console.log(APP_INFO, TAG, EXTRA_TAG, 'event: suspend');
-        if (isSilenceMode()) return;
         var onSuspend = new CustomEvent('gc:suspend');
         document.dispatchEvent(onSuspend);
     }
@@ -297,17 +240,6 @@ function MediaPlayer(config) {
      */
     function onTimeUpdate() {
         console.log(APP_INFO, TAG, EXTRA_TAG, "event: timeupdate: currentTime:", player.currentTime);
-        if ( isFakeLoop() && MediaPlayer.lastcurrenttime !== 0 && player.currentTime == 0 ) {
-            console.log(APP_INFO, TAG, EXTRA_TAG, 'fake end');
-            //NOTE: if loop == true -> ended event won't be fired
-            //Hence take it as an end of the video
-            player.pause();
-            MediaPlayer.turnOnSilenceMode();
-            onEnded(); // function callback when HTML5 Video "ended" event fired
-        }
-        MediaPlayer.lastcurrenttime = player.currentTime;
-        if (isSilenceMode()) return;
-
         var onTimeUpdate = new CustomEvent('gc:timeupdate', {detail: {currentTime: player.currentTime, duration: player.duration}});
         document.dispatchEvent(onTimeUpdate);
     }
@@ -320,7 +252,6 @@ function MediaPlayer(config) {
 
     function onWaiting() {
         console.log(APP_INFO, TAG, EXTRA_TAG, 'event: waiting');
-        if (isSilenceMode()) return;
         var onWaiting = new CustomEvent('gc:waiting');
         document.dispatchEvent(onWaiting);
     }

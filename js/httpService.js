@@ -59,6 +59,13 @@ function HttpService() {
                             break;
                         case 0:
                             console.log(APP_INFO, TAG, 'httpRequest aborted');
+                            /*
+                             * Mostly this calls when CORS error occurs
+                             * (in case of remote images from other domain and without authorization
+                             * used in the sample app)
+                             * So call success callback, without args, which will try to load the image via img tag
+                             */
+                            callbackSuccess();
                             break;
                         default://ERRORS
                             console.log(APP_INFO, TAG, 'httpRequest error');
@@ -111,6 +118,7 @@ function HttpService() {
          */
         stop: function() {
             console.log(APP_INFO, TAG, 'stop httpRequest');
+            httpRequest.onreadystatechange = null;
             httpRequest.abort();
             if (this.respUrl) {
                 var windowURL = window.URL || window.webkitURL;

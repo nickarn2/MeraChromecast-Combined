@@ -8,7 +8,7 @@ var APP_NAMESPACE = 'urn:x-cast:com.verizon.smartview',
 var senderId = null;
 
 var headband = document.getElementById('headband'),
-    videoThumbnail = document.getElementById('video-thumbnail'),
+    videoThumbnail = document.getElementById('thumbnail'),
     pictureContainer = document.getElementById('picture-container'),
     picture = document.getElementById("picture"),
     playerContainer = document.getElementById("player-container"),
@@ -18,7 +18,6 @@ var headband = document.getElementById('headband'),
     castMsg = document.getElementById("cast-msg"),
     preloadImg = new Image(),
     httpService = new HttpService(),
-
     stateObj = {};
 
 window.onload = function() {
@@ -77,10 +76,7 @@ window.onload = function() {
                         playPause(event); // control of a video playback
                         break;
                     case 'VIDEO':
-                        var parameters = stateObj.parameters,
-                            isSecure = Utils.isResourceSecure(parameters); // check if parameters has a list of headers || body parameters
-
-                        displayThumbnail(true, isSecure); // display a thumbnail
+                        displayThumbnail(true, 'video'); // display a thumbnail
                         break;
                 }
             } else if ( event == "RESUME" || event == "PAUSE" ) {
@@ -131,9 +127,8 @@ function clearStage(options) {
  */
 function displayImage() {
     var url = stateObj.media.url,
-        parameters = stateObj.parameters,
         orientation = stateObj.media.exif,
-        isSecure = Utils.isResourceSecure(parameters); // check if parameters has a list of headers || body parameters
+        hasOrientation = orientation !== null && orientation !== undefined;
 
     if (senderId) {
         var message = {
@@ -145,45 +140,48 @@ function displayImage() {
     }
 
     console.log(APP_INFO, TAG, url);
-    console.log(APP_INFO, TAG, 'parameters', parameters);
-    console.log(APP_INFO, TAG, 'isResourceSecure', isSecure);
 
-    clearStage(); // reset a screen state by default
+    clearStage({showLoader: false}); // reset a screen state by default
     Utils.ui.viewManager.setView('photo');
+    displayThumbnail(true, 'picture'); // display a thumbnail
     preloadImg.src = "";
     preloadImg.onload = null;
     preloadImg.onerror = null;
     player.stop(); // stop media playback
     httpService.stop(); // cancel current HTTP-query
 
-    if (isSecure) {
-        httpService.getAuthResource(stateObj.media, parameters, onLoadImageSuccess, onLoadImageError); // get a secure resource
-    } else {
-        preloadImg.onload = onLoadImageSuccess; // function callback at success
-        preloadImg.onerror = onLoadImageError; // function callback at failure
-        preloadImg.src = url;
-    }
+    displayImage();
 
     /**
-     * Function callback at success.
-     *
-     * @param {null} unk Unknown variable.
-     * @param {string} respUrl URL of thumbnail.
-     * @param {object} arraybuffer Response of remote resource.
-     * @return {undefined} Result: displaying a image.
+     * Load and display image.
      */
-    function onLoadImageSuccess(unk, respUrl, arraybuffer) {
-        console.log(APP_INFO, TAG, 'Load image success: ', url);
-        console.log(APP_INFO, TAG, 'respUrl', respUrl);
-
-        url = respUrl || url;
+    function displayImage() {
+        console.log(APP_INFO, TAG, 'Load image: ', url);
         Utils.ui.setVendorStyle(picture, "Transform", "none");
 
-        if (orientation !== null && orientation !== undefined) showImage(orientation);
-        else Utils.getImageOrientation(arraybuffer || url, showImage);
+        preloadImg.onload = function () {
+            console.log(APP_INFO, TAG, 'Load image success: ', url, ' Display.');
+            picture.style.backgroundImage = 'url(' + url + ')';
+            /*Here image is fully loaded and displayed*/
+            if (hasOrientation) rotateImage(orientation);
 
-        function showImage(ori) {
-            console.log(APP_INFO, TAG, 'show image');
+            displayThumbnail(false);
+            displayLoading(false);
+
+            if (senderId) {
+                var message = {
+                    "event": "MEDIA_PLAYBACK",
+                    "message": stateObj.media && stateObj.media.url || "",
+                    "media_event": {"event": "loadcomplete"}
+                };
+                Utils.sendMessageToSender(senderId, message);
+            }
+        }
+        preloadImg.onerror = onLoadImageError;
+        preloadImg.src = url;
+
+        function rotateImage(ori) {
+            console.log(APP_INFO, TAG, 'rotateImage');
 
             var transStyle = "",
                 deg = "",
@@ -207,26 +205,14 @@ function displayImage() {
                     break;
             }
 
-            console.log(APP_INFO, TAG, 'showImage deg: ', deg, ' ori:', ori);
-            console.log(APP_INFO, TAG, 'showImage picture.offsetHeight: ', picture.offsetHeight);
+            console.log(APP_INFO, TAG, 'rotateImage deg: ', deg, ' ori:', ori);
+            console.log(APP_INFO, TAG, 'rotateImage picture.offsetHeight: ', picture.offsetHeight);
 
             if (deg.length) transStyle += " rotate(" + deg + ")";
             if (flipV) transStyle += " scaleX(-1)";
             if (flipH) transStyle += " scaleY(-1)";
 
             if (transStyle.length) Utils.ui.setVendorStyle(picture, "Transform", transStyle);
-
-            displayLoading(false); // display a loading screen
-            picture.style.backgroundImage = 'url(' + url + ')';
-
-            if (senderId) {
-                var message = {
-                    "event": "MEDIA_PLAYBACK",
-                    "message": stateObj.media && stateObj.media.url || "",
-                    "media_event": { "event" : "loadcomplete" }
-                };
-                Utils.sendMessageToSender(senderId, message);
-            }
         }
     }
 
@@ -240,7 +226,8 @@ function displayImage() {
         console.log(APP_INFO, TAG, 'Load image error: ', url);
         console.log(APP_INFO, TAG, 'e', e);
 
-        displayLoading(false); // display a loading screen
+        displayThumbnail(false); // display a thumbnail
+        displayLoading(false);
         displayHeader();
         msg.innerHTML = e.detail && e.detail.msg || FAILED_TO_LOAD_MSG;
         msg.style.display = 'block';
@@ -273,15 +260,14 @@ function playPause(event) {
         clearStage(); // reset a screen state by default
         httpService.stop(); // cancel current HTTP-query
         player.stop(); // stop media playback
-        if (stateObj.media && stateObj.media.type == "AUDIO") playerEl.loop = false;
         player.play(stateObj.media.url); // start media playback
     } else if (event == 'PAUSE' || event == 'RESUME') {
         console.log("Current view", Utils.ui.viewManager.getRecentViewInfo().mode);
-        
-        var COMMAND_NOT_VALID = 
+
+        var COMMAND_NOT_VALID =
             Utils.ui.viewManager.getRecentViewInfo().mode !== 'media-player' &&
             !stateObj.loadStarted;
-            
+
         if (COMMAND_NOT_VALID) return;
 
         console.log("pause/resume - proceed");
@@ -304,7 +290,6 @@ function playPause(event) {
         }
     }
 }
-
 document.addEventListener('gc:abort', onAbort, false);
 document.addEventListener('gc:canplay', onReadyToPlay, false);
 document.addEventListener('gc:canplaythrough', onCanplayThrough, false);
@@ -345,17 +330,16 @@ function onReadyToPlay(e) {
 
     Utils.ui.viewManager.setView('media-player');
 
-    if (media.thumbnail) {
-        switch (media.type) {
-            case "VIDEO": playerContainer.setAttribute("poster", media.thumbnail); break;
-            case "AUDIO":
-                Utils.ui.setArtwork(playerContainer.querySelector(".artwork"), media.thumbnail);
-                Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), stateObj);
-                Utils.ui.initPlayerStyles();
-                Utils.ui.updatePlayerCurtimeLabel();
-                displayHeader(); // display a header with Verizon logo
-                break;
-        }
+    switch (media.type) {
+        case "VIDEO": if (media.thumbnail) playerContainer.setAttribute("poster", media.thumbnail); break;
+        case "AUDIO":
+            //checking if thumbnail is present is inside the following function
+            Utils.ui.setArtwork(playerContainer.querySelector(".artwork"), media.thumbnail);
+            Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), stateObj);
+            Utils.ui.initPlayerStyles();
+            Utils.ui.updatePlayerCurtimeLabel();
+            displayHeader(); // display a header with Verizon logo
+            break;
     }
 
     /* Send messages to Sender app*/
@@ -665,7 +649,7 @@ function onEnded() {
             Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
             break;
         case 'VIDEO':
-            displayThumbnail(true, null, true); // display a thumbnail
+            displayThumbnail(true, 'video', true); // display a thumbnail
             break;
     }
 
@@ -749,39 +733,50 @@ function displayLoading(flag) {
  * Display a thumbnail.
  *
  * @param {boolean} flag Do you need display a thumbnail?
- * @param {boolean} secure Is it secure connection?
+ * @param {boolean} type Display thumbnail either for 'video' or 'picture'
  * @param {boolean} cache Do you need get thumbnail from cache?
  * @return {undefined} Result: display a thumbnail.
  */
-function displayThumbnail(flag, secure, cache) {
-    var disp = 'displayed';
+function displayThumbnail(flag, type, cache) {
+    console.log(TAG, APP_INFO, 'displayThumbnail', flag);
+    var disp = 'displayed',
+        thumbnailUrl = stateObj.media.thumbnail,
+        thumbnailUrlDefaultVideo = 'images/song-default@3x.png',
+        thumbnailUrlDefaultPicture = 'images/song-default@3x.png';
 
     if (!flag) {
         videoThumbnail.classList.remove(disp);
         return;
     }
 
-    stateObj.loadStarted = false;
-    clearStage({showLoader: false}); // reset a screen state by default
-    pictureContainer.style.display = 'none';
-    player.stop(); // stop media playback
-    playerEl.loop = true;
+    switch(type) {
+        case 'video':
+            stateObj.loadStarted = false;
+            clearStage({showLoader: false}); // reset a screen state by default
+            pictureContainer.style.display = 'none';
+            player.stop(); // stop media playback
+
+            videoThumbnail.querySelector('.play-button').classList.add(disp);
+            videoThumbnail.querySelector('.loading').classList.remove(disp);
+            thumbnailUrl = thumbnailUrl || thumbnailUrlDefaultVideo;
+            break;
+        case 'picture':
+        default:
+            videoThumbnail.querySelector('.play-button').classList.remove(disp);
+            videoThumbnail.querySelector('.loading').classList.add(disp);
+            thumbnailUrl = thumbnailUrl || thumbnailUrlDefaultPicture;
+            break;
+    }
     videoThumbnail.classList.add(disp);
+
     if (!cache) {
-        videoThumbnail.querySelector('.video-thumbnail').style.backgroundImage = '';
+        videoThumbnail.querySelector('.thumbnail').style.backgroundImage = '';
     } else {
         return;
     }
 
-    if (secure) {
-        var thumbnail = {
-            type: 'PICTURE',
-            url: stateObj.media.thumbnail
-        }
-        httpService.getAuthResource(thumbnail, stateObj.parameters, onLoadImageSuccess, onLoadImageError); // get a secure resource
-    } else {
-        displayThumbnail(stateObj.media.thumbnail); // display a thumbnail
-    }
+    displayLoading(true);
+    display(thumbnailUrl);
 
     /**
      * Display a thumbnail.
@@ -789,28 +784,39 @@ function displayThumbnail(flag, secure, cache) {
      * @param {string} thumbnail URL of thumbnail.
      * @return {undefined} Result: displaying a thumbnail.
      */
-    function displayThumbnail(thumbnail) {
-        videoThumbnail.querySelector('.video-thumbnail').style.backgroundImage = 'url(' + thumbnail + ')';
+    function display(thumbnail) {
+        displayThumbnail.preloadThumb.src = "";
+        displayThumbnail.preloadThumb.onload = function() {
+            console.log(TAG, APP_INFO, 'Thumbnail is loaded');
+            displayLoading(false);
+            videoThumbnail.querySelector('.thumbnail').style.backgroundImage = 'url(' + thumbnail + ')';
+        }
+        displayThumbnail.preloadThumb.onerror = function() {
+            console.log(TAG, APP_INFO, 'Thumbnail load error');
+            if (thumbnailUrl !== thumbnailUrlDefaultVideo && thumbnailUrl !== thumbnailUrlDefaultPicture) {
+                displayDefaultThumbnail();
+            } else {
+                displayLoading(false);
+            }
+        }
+        displayThumbnail.preloadThumb.src = thumbnail;
     }
 
     /**
-     * Function callback at success.
-     *
-     * @param {null} unk Unknown variable.
-     * @param {string} url URL of thumbnail.
-     * @return {undefined} Result: displaying a thumbnail.
+     * Display default thumbnail.
      */
-    function onLoadImageSuccess(unk, url) {
-        displayThumbnail(url); // display a thumbnail
-    }
-
-    /**
-     * Function callback at failure.
-     *
-     * @param {object} details Object details.
-     * @param {undefined} Result: to do nothing.
-     */
-    function onLoadImageError(details) {
-        // to do nothing
+    function displayDefaultThumbnail() {
+        switch (type) {
+            case 'video':
+                thumbnailUrl = thumbnailUrlDefaultVideo;
+                break;
+            case 'picture':
+            default:
+                thumbnailUrl = thumbnailUrlDefaultPicture;
+                break;
+        }
+        display(thumbnailUrl);
     }
 }
+displayThumbnail.preloadThumb = new Image();
+
