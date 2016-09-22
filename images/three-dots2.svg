@@ -1,0 +1,23 @@
+<svg width="120" height="30" viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg" fill="#fff">
+    <circle cx="15" cy="15" r="15">
+        <animate attributeName="fill" 
+                 begin="0s" dur="1s"
+                 values="#BEBDBD;#8D8E8E;#000000;#8D8E8E;#BEBDBD;#BEBDBD;#BEBDBD;#BEBDBD" calcMode="discrete"
+                 repeatCount="indefinite" />
+
+    </circle>
+    <circle cx="60" cy="15" r="15" >
+        <animate attributeName="fill"
+                 begin="0s" dur="1s"
+                 values="#BEBDBD;#BEBDBD;#BEBDBD;#8D8E8E;#000000;#8D8E8E;#BEBDBD;#BEBDBD" calcMode="discrete"
+                 repeatCount="indefinite" />
+
+    </circle>
+    <circle cx="105" cy="15" r="15">
+        <animate attributeName="fill" 
+                 begin="0s" dur="1s"
+                 values="#BEBDBD;#BEBDBD;#BEBDBD;#BEBDBD;#BEBDBD;#BEBDBD;#8D8E8E;#000000;#8D8E8E" calcMode="discrete"
+                 repeatCount="indefinite" />
+
+    </circle>
+</svg>

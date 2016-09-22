@@ -124,7 +124,7 @@ body {
     width: 100%;
 }
 .content-headband .loading .loading-cloud-logo {
-    height: 37%;
+    height: 37%;/*Should be equal to the top property of #thumbnail .loading-loader*/
     padding-top: 5%;
     text-align: center;
 }
@@ -143,10 +143,18 @@ body {
     color: #cd040b;
 }
 .content-headband .loading-loader {
-    background: url('../images/spin.svg') no-repeat;
-    background-size: auto 100%;
-    background-position: center;
     height: 20%;
+    position: relative;
+}
+.content-headband .loading-loader img {
+    display: block;
+    height: 30%;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 .content-headband .loading .loading-text {
     height: 43%;
@@ -165,6 +173,7 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
+    background-color: #fff;
 }
 #thumbnail .thumbnail {
     width: 100%;
@@ -193,10 +202,19 @@ body {
     bottom: 0;
 }
 #thumbnail .loading-loader {
-    background: url('../images/spin.svg') no-repeat;
-    background-size: auto 100%;
-    background-position: center;
     height: 20%;
+    top: 37%;/*Should be equal to the height of .content-headband .loading .loading-cloud-logo*/
+    position: relative;
+}
+#thumbnail .loading-loader img {
+    display: block;
+    height: 30%;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 /* @2x Images (Pixel Ratio of 1.25+) */
 @media  (-o-min-device-pixel-ratio: 5/4),

@@ -76,7 +76,11 @@ window.onload = function() {
                         playPause(event); // control of a video playback
                         break;
                     case 'VIDEO':
-                        displayThumbnail(true, 'video'); // display a thumbnail
+                        displayThumbnail(true, 'video', function() {
+                            clearStage({showLoader: false, showThumbnail: true}); // reset a screen state by default
+                            pictureContainer.style.display = 'none';
+                            player.stop(); // stop media playback
+                        });
                         break;
                 }
             } else if ( event == "RESUME" || event == "PAUSE" ) {
@@ -102,7 +106,7 @@ function clearStage(options) {
     msg.style.display = "none";
     castMsg.innerHTML = "";
 
-    Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
+    //Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
     playerContainer.style.display = "none";
     playerContainer.removeAttribute("poster");
     playerContainer.querySelector(".artwork").style.backgroundImage = "";
@@ -115,8 +119,7 @@ function clearStage(options) {
     picture.style.backgroundSize = "contain";
     displayHeadband(false); // don't display a headband screen
     displayLoading(false); // don't display a loading screen
-    displayThumbnail(false);  // don't display a thumbnail
-
+    if (!options || !options.showThumbnail) displayThumbnail(false);  // don't display a thumbnail
     if (!options || options.showLoader) displayLoading(true); // display a loading screen
 }
 
@@ -141,16 +144,20 @@ function displayImage() {
 
     console.log(APP_INFO, TAG, url);
 
-    clearStage({showLoader: false}); // reset a screen state by default
-    Utils.ui.viewManager.setView('photo');
-    displayThumbnail(true, 'picture'); // display a thumbnail
-    preloadImg.src = "";
-    preloadImg.onload = null;
-    preloadImg.onerror = null;
-    player.stop(); // stop media playback
-    httpService.stop(); // cancel current HTTP-query
-
     displayImage();
+    displayThumbnail(true, 'picture', function() {
+        console.log(APP_INFO, TAG, 'Stage is prepared', prepareStage.prepared);
+        if (!prepareStage.prepared) prepareStage();
+    });
+
+    function prepareStage() {
+        prepareStage.prepared = true;
+        clearStage({showLoader: false, showThumbnail: true}); // reset a screen state by default
+        Utils.ui.viewManager.setView('photo');
+        player.stop(); // stop media playback
+        httpService.stop(); // cancel current HTTP-query*/
+    }
+    prepareStage.prepared = false;
 
     /**
      * Load and display image.
@@ -159,14 +166,20 @@ function displayImage() {
         console.log(APP_INFO, TAG, 'Load image: ', url);
         Utils.ui.setVendorStyle(picture, "Transform", "none");
 
+        preloadImg.src = "";//Stop loading previous picture
+        preloadImg.onload = null;
+        preloadImg.onerror = null;
+
         preloadImg.onload = function () {
             console.log(APP_INFO, TAG, 'Load image success: ', url, ' Display.');
+            console.log(APP_INFO, TAG, 'Stage is prepared', prepareStage.prepared);
+            if (!prepareStage.prepared) prepareStage();
+
             picture.style.backgroundImage = 'url(' + url + ')';
             /*Here image is fully loaded and displayed*/
             if (hasOrientation) rotateImage(orientation);
 
             displayThumbnail(false);
-            displayLoading(false);
 
             if (senderId) {
                 var message = {
@@ -239,7 +252,7 @@ function displayImage() {
         if (senderId) {
             var message = {
                 "event": "ERROR",
-                "media": {"url": e.detail.url},
+                "media": {"url": url},
                 "error": {"description": desc, "code": code}
             };
             Utils.sendMessageToSender(senderId, message);
@@ -331,13 +344,16 @@ function onReadyToPlay(e) {
     Utils.ui.viewManager.setView('media-player');
 
     switch (media.type) {
-        case "VIDEO": if (media.thumbnail) playerContainer.setAttribute("poster", media.thumbnail); break;
+        case "VIDEO":
+            if (media.thumbnail) playerContainer.setAttribute("poster", media.thumbnail);
+            displayThumbnail(false);
+            break;
         case "AUDIO":
             //checking if thumbnail is present is inside the following function
             Utils.ui.setArtwork(playerContainer.querySelector(".artwork"), media.thumbnail);
             Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), stateObj);
             Utils.ui.initPlayerStyles();
-            Utils.ui.updatePlayerCurtimeLabel();
+            //Utils.ui.updatePlayerCurtimeLabel();
             displayHeader(); // display a header with Verizon logo
             break;
     }
@@ -646,10 +662,10 @@ function onEnded() {
     var type = stateObj.media && stateObj.media.type;
     switch (type) {
         case 'AUDIO':
-            Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
+            //Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
             break;
         case 'VIDEO':
-            displayThumbnail(true, 'video', true); // display a thumbnail
+            displayThumbnail(true, 'video', null, true); // display a thumbnail
             break;
     }
 
@@ -734,48 +750,34 @@ function displayLoading(flag) {
  *
  * @param {boolean} flag Do you need display a thumbnail?
  * @param {boolean} type Display thumbnail either for 'video' or 'picture'
+ * @param {Function} cb Callback: apply changes when thumbnail is loaded and ready to be displayed
  * @param {boolean} cache Do you need get thumbnail from cache?
  * @return {undefined} Result: display a thumbnail.
  */
-function displayThumbnail(flag, type, cache) {
+function displayThumbnail(flag, type, cb, cache) {
     console.log(TAG, APP_INFO, 'displayThumbnail', flag);
     var disp = 'displayed',
         thumbnailUrl = stateObj.media.thumbnail,
-        thumbnailUrlDefaultVideo = 'images/song-default@3x.png',
-        thumbnailUrlDefaultPicture = 'images/song-default@3x.png';
+        DEFAULT_THUMBNAIL = {
+            video:      'images/song-default@3x.png',
+            picture:    'images/song-default@3x.png',
+            default:    'images/song-default@3x.png'
+        };
 
     if (!flag) {
+        displayThumbnail.preloadThumb.src = "";
+        displayThumbnail.preloadThumb.onload = null;
+        displayThumbnail.preloadThumb.onerror = null;
         videoThumbnail.classList.remove(disp);
         return;
     }
 
-    switch(type) {
-        case 'video':
-            stateObj.loadStarted = false;
-            clearStage({showLoader: false}); // reset a screen state by default
-            pictureContainer.style.display = 'none';
-            player.stop(); // stop media playback
-
-            videoThumbnail.querySelector('.play-button').classList.add(disp);
-            videoThumbnail.querySelector('.loading').classList.remove(disp);
-            thumbnailUrl = thumbnailUrl || thumbnailUrlDefaultVideo;
-            break;
-        case 'picture':
-        default:
-            videoThumbnail.querySelector('.play-button').classList.remove(disp);
-            videoThumbnail.querySelector('.loading').classList.add(disp);
-            thumbnailUrl = thumbnailUrl || thumbnailUrlDefaultPicture;
-            break;
-    }
-    videoThumbnail.classList.add(disp);
-
-    if (!cache) {
-        videoThumbnail.querySelector('.thumbnail').style.backgroundImage = '';
-    } else {
+    if (cache) {
+        videoThumbnail.classList.add(disp);
         return;
     }
 
-    displayLoading(true);
+    thumbnailUrl = thumbnailUrl || DEFAULT_THUMBNAIL[type] || DEFAULT_THUMBNAIL.default;
     display(thumbnailUrl);
 
     /**
@@ -788,33 +790,46 @@ function displayThumbnail(flag, type, cache) {
         displayThumbnail.preloadThumb.src = "";
         displayThumbnail.preloadThumb.onload = function() {
             console.log(TAG, APP_INFO, 'Thumbnail is loaded');
-            displayLoading(false);
+            updateThumbnailPageStyles();
             videoThumbnail.querySelector('.thumbnail').style.backgroundImage = 'url(' + thumbnail + ')';
+            cb && cb();
         }
         displayThumbnail.preloadThumb.onerror = function() {
             console.log(TAG, APP_INFO, 'Thumbnail load error');
-            if (thumbnailUrl !== thumbnailUrlDefaultVideo && thumbnailUrl !== thumbnailUrlDefaultPicture) {
+            if (thumbnailUrl !== DEFAULT_THUMBNAIL[type] && thumbnailUrl !== DEFAULT_THUMBNAIL.default) {
                 displayDefaultThumbnail();
             } else {
-                displayLoading(false);
+                updateThumbnailPageStyles();
+                cb && cb();
             }
         }
         displayThumbnail.preloadThumb.src = thumbnail;
+    }
+
+    function updateThumbnailPageStyles() {
+        videoThumbnail.classList.add(disp);
+        switch(type) {
+            case 'video':
+                videoThumbnail.querySelector('.play-button').classList.add(disp);
+                videoThumbnail.querySelector('.loading').classList.remove(disp);
+
+                preloadImg.src = "";
+                preloadImg.onload = null;
+                preloadImg.onerror = null;
+                break;
+            case 'picture':
+            default:
+                videoThumbnail.querySelector('.play-button').classList.remove(disp);
+                videoThumbnail.querySelector('.loading').classList.add(disp);
+                break;
+        }
     }
 
     /**
      * Display default thumbnail.
      */
     function displayDefaultThumbnail() {
-        switch (type) {
-            case 'video':
-                thumbnailUrl = thumbnailUrlDefaultVideo;
-                break;
-            case 'picture':
-            default:
-                thumbnailUrl = thumbnailUrlDefaultPicture;
-                break;
-        }
+        thumbnailUrl = DEFAULT_THUMBNAIL[type] || DEFAULT_THUMBNAIL.default;
         display(thumbnailUrl);
     }
 }
