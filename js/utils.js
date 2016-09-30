@@ -20,11 +20,17 @@ var Utils = (function(){
      */
     function setArtwork(element, artwork) {
         var playerContainer = document.getElementById('player-container'),
+            artworkLoader = element.querySelector('.loader'),
             height = Math.ceil(playerContainer.offsetHeight / 2),
             width = height;
 
         element.style.width = width+"px";
         element.style.height = height+"px";
+
+        artworkLoader.style.width = width+"px";
+        artworkLoader.style.height = height+"px";
+        artworkLoader.classList.add('displayed');
+
         if (artwork && artwork.length !== 0) element.style.backgroundImage = 'url(' + artwork + ')'
         else element.style.backgroundImage = 'url(images/song-default@3x.png)';
     }

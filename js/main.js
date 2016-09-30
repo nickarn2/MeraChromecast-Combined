@@ -76,11 +76,11 @@ window.onload = function() {
                         playPause(event); // control of a video playback
                         break;
                     case 'VIDEO':
-                        displayThumbnail(true, 'video', function() {
+                        displayThumbnail({flag: true, type:'video', cb: function() {
                             clearStage({showLoader: false, showThumbnail: true}); // reset a screen state by default
                             pictureContainer.style.display = 'none';
                             player.stop(); // stop media playback
-                        });
+                        }});
                         break;
                 }
             } else if ( event == "RESUME" || event == "PAUSE" ) {
@@ -113,13 +113,15 @@ function clearStage(options) {
     playerContainer.querySelector(".info .title").innerHTML = "";
     playerContainer.querySelector(".info .desc").innerHTML = "";
     playerContainer.querySelector(".controls").style.display = "none";
+    playerContainer.querySelector(".controls .durtime").innerHTML = "0:00";
+    playerContainer.querySelector(".controls .curtime").innerHTML = "0:00";
 
     pictureContainer.style.display = "block";
     picture.style.backgroundImage = "";
     picture.style.backgroundSize = "contain";
     displayHeadband(false); // don't display a headband screen
     displayLoading(false); // don't display a loading screen
-    if (!options || !options.showThumbnail) displayThumbnail(false);  // don't display a thumbnail
+    if (!options || !options.showThumbnail) displayThumbnail({flag: false});  // don't display a thumbnail
     if (!options || options.showLoader) displayLoading(true); // display a loading screen
 }
 
@@ -145,10 +147,10 @@ function displayImage() {
     console.log(APP_INFO, TAG, url);
 
     displayImage();
-    displayThumbnail(true, 'picture', function() {
+    displayThumbnail({flag: true, type: 'picture', cb: function() {
         console.log(APP_INFO, TAG, 'Stage is prepared', prepareStage.prepared);
         if (!prepareStage.prepared) prepareStage();
-    });
+    }});
 
     function prepareStage() {
         prepareStage.prepared = true;
@@ -179,7 +181,7 @@ function displayImage() {
             /*Here image is fully loaded and displayed*/
             if (hasOrientation) rotateImage(orientation);
 
-            displayThumbnail(false);
+            displayThumbnail({flag: false});
 
             if (senderId) {
                 var message = {
@@ -239,7 +241,7 @@ function displayImage() {
         console.log(APP_INFO, TAG, 'Load image error: ', url);
         console.log(APP_INFO, TAG, 'e', e);
 
-        displayThumbnail(false); // display a thumbnail
+        displayThumbnail({flag: false}); // display a thumbnail
         displayLoading(false);
         displayHeader();
         msg.innerHTML = e.detail && e.detail.msg || FAILED_TO_LOAD_MSG;
@@ -270,7 +272,24 @@ function playPause(event) {
     if (!stateObj.loadStarted) {
         console.log(APP_INFO, '!loadStarted');
         stateObj.loadStarted = true;
-        clearStage(); // reset a screen state by default
+
+        switch(stateObj.media.type) {
+            case 'AUDIO':
+                clearStage({showLoader: false}); // reset a screen state by default
+
+                Utils.ui.viewManager.setView('media-player');
+
+                //checking if thumbnail is present is inside the following function
+                Utils.ui.setArtwork(playerContainer.querySelector(".artwork"), stateObj.media.thumbnail);
+                Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), stateObj);
+                //Utils.ui.updatePlayerCurtimeLabel();
+                displayHeader(); // display a header with Verizon logo
+                break;
+            case 'VIDEO':
+                displayThumbnail({showLoading: true});
+                break;
+        }
+
         httpService.stop(); // cancel current HTTP-query
         player.stop(); // stop media playback
         player.play(stateObj.media.url); // start media playback
@@ -341,20 +360,14 @@ function onReadyToPlay(e) {
     console.log(APP_INFO, TAG, 'onReadyToPlay: ', e);
     var media = stateObj.media;
 
-    Utils.ui.viewManager.setView('media-player');
-
     switch (media.type) {
         case "VIDEO":
+            Utils.ui.viewManager.setView('media-player');
             if (media.thumbnail) playerContainer.setAttribute("poster", media.thumbnail);
-            displayThumbnail(false);
+            displayThumbnail({flag: false});
             break;
         case "AUDIO":
-            //checking if thumbnail is present is inside the following function
-            Utils.ui.setArtwork(playerContainer.querySelector(".artwork"), media.thumbnail);
-            Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), stateObj);
-            Utils.ui.initPlayerStyles();
-            //Utils.ui.updatePlayerCurtimeLabel();
-            displayHeader(); // display a header with Verizon logo
+            playerContainer.querySelector('.artwork .loader').classList.remove('displayed');
             break;
     }
 
@@ -461,6 +474,8 @@ function onLoadedMetadata(e) {
         curtime.innerHTML = timeStr;
         if (stateObj.media.duration) timeStr = Utils.getTimeStr(stateObj.media.duration);
         durtime.innerHTML = timeStr;
+
+        Utils.ui.initPlayerStyles();
     }
 
     /* Send messages to Sender app*/
@@ -665,7 +680,7 @@ function onEnded() {
             //Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
             break;
         case 'VIDEO':
-            displayThumbnail(true, 'video', null, true); // display a thumbnail
+            displayThumbnail({flag: true, type: 'video', cache: true}); // display a thumbnail
             break;
     }
 
@@ -748,13 +763,23 @@ function displayLoading(flag) {
 /**
  * Display a thumbnail.
  *
- * @param {boolean} flag Do you need display a thumbnail?
- * @param {boolean} type Display thumbnail either for 'video' or 'picture'
- * @param {Function} cb Callback: apply changes when thumbnail is loaded and ready to be displayed
- * @param {boolean} cache Do you need get thumbnail from cache?
- * @return {undefined} Result: display a thumbnail.
+ * @argument {object}   opt             Options, extracts from arguments array
+ * @param {boolean}     opt.flag        Do you need display a thumbnail?
+ * @param {boolean}     opt.showLoading Display thumbnail with loading spinner? (It's implied thumbnail is shown already)
+ * @param {boolean}     opt.type        Display thumbnail either for 'video' or 'picture'
+ * @param {Function}    opt.cb          Callback: apply changes when thumbnail is loaded and ready to be displayed
+ * @param {boolean}     opt.cache       Do you need get thumbnail from cache?
+ *
+ * @return {undefined}  Result: display a thumbnail.
  */
-function displayThumbnail(flag, type, cb, cache) {
+function displayThumbnail() {
+    var opt = arguments[0] && (typeof arguments[0] === 'object') && arguments[0] || {},
+        flag =          opt.flag === undefined || opt.flag === null ? true : opt.flag,
+        showLoading =   opt.showLoading,
+        type =          opt.type,
+        cb =            opt.cb,
+        cache =         opt.cache;
+
     console.log(TAG, APP_INFO, 'displayThumbnail', flag);
     var disp = 'displayed',
         thumbnailUrl = stateObj.media.thumbnail,
@@ -772,7 +797,17 @@ function displayThumbnail(flag, type, cb, cache) {
         return;
     }
 
+    if (showLoading) {
+        //It's implied thumbnail is shown already
+        videoThumbnail.querySelector('.play-button').classList.remove(disp);
+        videoThumbnail.querySelector('.loading').classList.add(disp);
+        return;
+    }
+
     if (cache) {
+        videoThumbnail.querySelector('.play-button').classList.add(disp);
+        videoThumbnail.querySelector('.loading').classList.remove(disp);
+
         videoThumbnail.classList.add(disp);
         return;
     }

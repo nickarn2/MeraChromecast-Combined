@@ -315,6 +315,21 @@ body {
     background-size: contain;
 }
 
+#player-container .artwork .loader {
+    position: absolute;
+    display: none;
+}
+
+#player-container .artwork .loader img {
+    margin: auto;
+    height: 10%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
 #player-container .info {
     margin: 30px 15px 0 15px;
     font-size: 16pt;
