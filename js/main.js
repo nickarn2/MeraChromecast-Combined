@@ -147,10 +147,16 @@ function displayImage() {
     console.log(APP_INFO, TAG, url);
 
     displayImage();
-    displayThumbnail({flag: true, type: 'picture', cb: function() {
-        console.log(APP_INFO, TAG, 'Stage is prepared', prepareStage.prepared);
+
+    if (stateObj.media && stateObj.media.thumbnail) {
+        displayThumbnail({flag: true, type: 'picture', cb: function() {
+            console.log(APP_INFO, TAG, 'Stage is prepared', prepareStage.prepared);
+            if (!prepareStage.prepared) prepareStage();
+        }});
+    } else {
         if (!prepareStage.prepared) prepareStage();
-    }});
+        displayLoading(true);
+    }
 
     function prepareStage() {
         prepareStage.prepared = true;
@@ -182,6 +188,7 @@ function displayImage() {
             if (hasOrientation) rotateImage(orientation);
 
             displayThumbnail({flag: false});
+            displayLoading(false);
 
             if (senderId) {
                 var message = {
@@ -322,6 +329,7 @@ function playPause(event) {
         }
     }
 }
+
 document.addEventListener('gc:abort', onAbort, false);
 document.addEventListener('gc:canplay', onReadyToPlay, false);
 document.addEventListener('gc:canplaythrough', onCanplayThrough, false);
