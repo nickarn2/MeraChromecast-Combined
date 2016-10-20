@@ -1,0 +1,6 @@
+VERSION=1.1.1
+HTMLAPP=chromecast
+BUILD_DIR=build/
+BUILD_APP_DIR=build/smarttv/$HTMLAPP/
+BUILD_ARCHIVE_DIR=smarttv/
+ARCHIVE_FILE="$HTMLAPP"-"$VERSION".tar.gz
