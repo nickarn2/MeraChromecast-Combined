@@ -13,7 +13,7 @@ This codebase is currently separate from the MERA codebase. The update process i
 6. Push the tag to the server, e.g. `git push origin 1.9.5.20161019.1`
 
 ## Build Process
-Since Chromecast HTML5 app is a static web app, there is no notion of a 'build' in a typical software development project. The build script basically packages the HTML5 app files into a versioned archive and uploads the archive to a Nexus repo. The server team will download the archive and depoy it to production.
+Since Chromecast HTML5 app is a static web app, there is no notion of a 'build', i.e. compile and package. The build script basically packages the HTML5 app files into a versioned archive and uploads the archive to a Nexus repo. The server team will download the archive and depoy it to production.
 
 ### Buld procedure
 1. Pull the latest from the `master` branch or, check out the desired tag
