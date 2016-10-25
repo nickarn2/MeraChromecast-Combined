@@ -35,12 +35,6 @@ if [ "$UPLOAD" = true ]; then
 	echo_log "uploading artifact to nexus..."
 	# curl -v -F r=$NEXUS_REPO -F hasPom=false -F e=$NEXUS_EXTENSION -F g=$NEXUS_GROUP_ID -F a=$NEXUS_ARTIFACT_ID -F v=$VERSION -F p=$NEXUS_PACKAGING_TYPE -F file=@$ARCHIVE_FILE $NEXUS_API_URL
 
-	mvn deploy:deploy-file \
-	    -Durl=$NEXUS_REPO_URL \
-	    -DrepositoryId=$NEXUS_REPO \
-	    -DgroupId=$NEXUS_GROUP_ID \
-	    -DartifactId=$NEXUS_ARTIFACT_ID \
-	    -Dversion=$VERSION  \
-	    -Dfile=$ARCHIVE_FILE
+	mvn deploy:deploy-file -Durl=$NEXUS_REPO_URL -DrepositoryId=$NEXUS_REPO -DgroupId=$NEXUS_GROUP_ID -DartifactId=$NEXUS_ARTIFACT_ID -Dversion=$VERSION -Dfile=$ARCHIVE_FILE
 
 fi
