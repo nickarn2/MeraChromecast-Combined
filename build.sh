@@ -1,6 +1,7 @@
 #!/bin/bash
 UPLOAD=false
 VARS_FILE=vars.txt
+
 # read in the VERSION
 source $VARS_FILE
 
@@ -31,5 +32,6 @@ tar -tvf $ARCHIVE_FILE
 echo_log "build complete."
 
 if [ "$UPLOAD" = true ]; then
-	echo_log "uploading artifact..."
+	echo_log "uploading artifact to nexus..."
+	curl -v -F r=$NEXUS_REPO -F hasPom=false -F e=$NEXUS_EXTENSION -F g=$NEXUS_GROUP_ID -F a=$NEXUS_ARTIFACT_ID -F v=$VERSION -F p=$NEXUS_PACKAGING_TYPE -F file=@$ARCHIVE_FILE $NEXUS_API_URL
 fi

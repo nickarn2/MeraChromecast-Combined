@@ -1,6 +1,12 @@
-VERSION=1.9.5
+VERSION=0.0.1
 HTMLAPP=chromecast
 BUILD_DIR=build/
 BUILD_APP_DIR=build/$HTMLAPP/
 BUILD_ARCHIVE_DIR=$HTMLAPP/
 ARCHIVE_FILE="$HTMLAPP"-"$VERSION".tar.gz
+NEXUS_API_URL=http://mavenrepo.synchronoss.net:8081/nexus/service/local/artifact/maven/content
+NEXUS_REPO=cts-releases
+NEXUS_GROUP_ID=com.synchronoss.verizon.cloud
+NEXUS_ARTIFACT_ID=chromecast
+NEXUS_PACKAGING_TYPE=gz
+NEXUS_EXTENSION=gz
