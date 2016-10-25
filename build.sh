@@ -1,7 +1,6 @@
 #!/bin/bash
 VARS_FILE=vars.txt
-
-# read in the VERSION
+# read in the environment variables
 source $VARS_FILE
 
 echo_log() {
