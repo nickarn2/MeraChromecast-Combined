@@ -25,7 +25,7 @@ Since Chromecast HTML5 app is a static web app, there is no notion of a 'build',
 The following bamboo build plan can be used to build and deploy a `tar.gz` to the nexus repository:
 https://bamboo.synchronoss.net:8443/browse/SYNCDH-CC
 
-**Important: Make sure to match the build version in the `js/config.js` file with the `vars.txt` variable.
+**Important: Make sure to match the build version in the `js/config.js` file with the `vars.txt` variable.**
 
 ## Nexus
 The Chromecast HTML5 app archive is in the CTS Releases repository groupId: com.synchronoss.verizon.cloud & artifactId: chromecast.
