@@ -5,13 +5,6 @@ VARS_FILE=vars.txt
 # read in the VERSION
 source $VARS_FILE
 
-while getopts "u" opt; do
-    case $opt in
-    u) UPLOAD=true ;;
-    \?) ;; # Handle error: unknown option or missing required argument.
-    esac
-done
-
 echo_log() {
   date +"%Y-%m-%d_%H:%M:%S.%3N: $1" 
 }
@@ -30,11 +23,3 @@ tar -czf $ARCHIVE_FILE $BUILD_ARCHIVE_DIR
 echo_log "listing $ARCHIVE_FILE contents ..."
 tar -tvf $ARCHIVE_FILE
 echo_log "build complete."
-
-# if [ "$UPLOAD" = true ]; then
-# 	echo_log "uploading artifact to nexus..."
-# 	# curl -v -F r=$NEXUS_REPO -F hasPom=false -F e=$NEXUS_EXTENSION -F g=$NEXUS_GROUP_ID -F a=$NEXUS_ARTIFACT_ID -F v=$VERSION -F p=$NEXUS_PACKAGING_TYPE -F file=@$ARCHIVE_FILE $NEXUS_API_URL
-
-# 	mvn deploy:deploy-file -Durl=$NEXUS_REPO_URL -DrepositoryId=$NEXUS_REPO -DgroupId=$NEXUS_GROUP_ID -DartifactId=$NEXUS_ARTIFACT_ID -Dversion=$VERSION -Dfile=$ARCHIVE_FILE -X
-
-# fi
