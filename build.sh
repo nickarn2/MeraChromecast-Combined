@@ -1,5 +1,4 @@
 #!/bin/bash
-UPLOAD=false
 VARS_FILE=vars.txt
 
 # read in the VERSION
