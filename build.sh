@@ -9,7 +9,6 @@ echo_log() {
 }
 
 echo_log "starting build for $HTMLAPP version: $VERSION ..."
-
 echo_log "cleaning $BUILD_DIR ..."
 rm -Rf $BUILD_DIR
 echo_log "creating build directory structure $BUILD_APP_DIR ..."
@@ -21,5 +20,4 @@ echo_log "creating archive $ARCHIVE_FILE ..."
 tar -czf $ARCHIVE_FILE $BUILD_ARCHIVE_DIR
 echo_log "listing $ARCHIVE_FILE contents ..."
 tar -tvf $ARCHIVE_FILE
-pwd
 echo_log "build complete."
