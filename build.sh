@@ -21,4 +21,5 @@ echo_log "creating archive $ARCHIVE_FILE ..."
 tar -czf $ARCHIVE_FILE $BUILD_ARCHIVE_DIR
 echo_log "listing $ARCHIVE_FILE contents ..."
 tar -tvf $ARCHIVE_FILE
+pwd
 echo_log "build complete."
