@@ -19,7 +19,7 @@ Since Chromecast HTML5 app is a static web app, there is no notion of a 'build',
 1. Pull the latest from the `master` branch or, check out the desired tag
 2. Verify the `VERSION` variable in the `vars.txt` matches the `version:` property in js/config.js
 3. Execute `./build.sh` in the root directory
-4. An archive (e.g. chromecast-1.0.0.tar.gz) is created in the `build/` directory and it contains the web app files in a specific directory structure as required by the server team. The `build/smarttv/` directory is the source copied from the repo that excludes hidden files/directories, build scripts and other  files that are not required by the web app.
+4. An archive (e.g. chromecast-1.0.0.tar.gz) is created in the `build/` directory and it contains the web app files in a specific directory structure as required by the server team. The `build/` directory is the source copied from the repo that excludes hidden files/directories, build scripts and other  files that are not required by the web app.
  
 ### Bamboo Build
 The following bamboo build plan can be used to build and deploy a `tar.gz` to the nexus repository:
