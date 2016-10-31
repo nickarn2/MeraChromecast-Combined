@@ -57,8 +57,8 @@ function MediaPlayer(config) {
                 me.state = STATE[0];
                 me.unregisterEvents();
                 player.src = "";
-                player.load();//force buffering
                 player.removeAttribute('src');
+                player.load();//force buffering
                 player.removeAttribute('poster');
             }
         },

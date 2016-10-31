@@ -6,26 +6,36 @@ var APP_NAMESPACE = 'urn:x-cast:com.verizon.smartview',
     FAILED_TO_LOAD_MSG = 'Failed to load resource';
 
 var senderId = null;
+var tvApp = {
 
-var headband = document.getElementById('headband'),
-    videoThumbnail = document.getElementById('thumbnail'),
-    pictureContainer = document.getElementById('picture-container'),
+    stateObj: {},
+    preloadImg: new Image(),
+    init: function(){
+        var tvApp = this;
+
+        tvApp.videoThumbnail = document.getElementById('thumbnail');
+        tvApp.headband = document.getElementById('headband')
+        Page.init( tvApp );
+    }
+
+};
+
+var pictureContainer = document.getElementById('picture-container'),
     picture = document.getElementById("picture"),
     playerContainer = document.getElementById("player-container"),
     playerEl = document.getElementById("vid"),
     player = new MediaPlayer({player: playerEl}),
     msg = document.getElementById("msg"),
     castMsg = document.getElementById("cast-msg"),
-    preloadImg = new Image(),
-    httpService = new HttpService(),
-    stateObj = {};
+    httpService = new HttpService();
 
 window.onload = function() {
+    tvApp.init();
     // Turn on debugging so that you can see what is going on.  Please turn this off
     // on your production receivers to improve performance.
     cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
 
-    displayHeadband(true); // display a headband screen
+    Page.headband.display(true); // display a headband screen
 
     window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
     console.log(APP_INFO, TAG, 'Starting Receiver Manager');
@@ -58,14 +68,14 @@ window.onload = function() {
 
         try {
             var parsed = JSON.parse(event.data);
-            if (parsed.media) stateObj = parsed;
+            if (parsed.media) tvApp.stateObj = parsed;
 
             var event = parsed.event,
-                type = stateObj.media && stateObj.media.type;
+                type = tvApp.stateObj.media && tvApp.stateObj.media.type;
 
             if ( event == "LOAD_START" ) {
-                if ( !stateObj.media ) return;
-                stateObj.loadStarted = false;
+                if ( !tvApp.stateObj.media ) return;
+                tvApp.stateObj.loadStarted = false;
 
                 console.log(APP_INFO, TAG, type);
                 switch( type ) {
@@ -76,7 +86,7 @@ window.onload = function() {
                         playPause(event); // control of a video playback
                         break;
                     case 'VIDEO':
-                        displayThumbnail({flag: true, type:'video', cb: function() {
+                        Page.thumbnail.display({flag: true, type:'video', cb: function() {
                             clearStage({showLoader: false, showThumbnail: true}); // reset a screen state by default
                             pictureContainer.style.display = 'none';
                             player.stop(); // stop media playback
@@ -119,10 +129,10 @@ function clearStage(options) {
     pictureContainer.style.display = "block";
     picture.style.backgroundImage = "";
     picture.style.backgroundSize = "contain";
-    displayHeadband(false); // don't display a headband screen
-    displayLoading(false); // don't display a loading screen
-    if (!options || !options.showThumbnail) displayThumbnail({flag: false});  // don't display a thumbnail
-    if (!options || options.showLoader) displayLoading(true); // display a loading screen
+    Page.headband.display(false); // don't display a headband screen
+    Page.loading.display(false); // don't display a loading screen
+    if (!options || !options.showThumbnail) Page.thumbnail.display({flag: false});  // don't display a thumbnail
+    if (!options || options.showLoader) Page.loading.display(true); // display a loading screen
 }
 
 /**
@@ -131,14 +141,14 @@ function clearStage(options) {
  * @return {undefined} Result: displaying an image.
  */
 function displayImage() {
-    var url = stateObj.media.url,
-        orientation = stateObj.media.exif,
+    var url = tvApp.stateObj.media.url,
+        orientation = tvApp.stateObj.media.exif,
         hasOrientation = orientation !== null && orientation !== undefined;
 
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "loadstart" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -148,14 +158,14 @@ function displayImage() {
 
     displayImage();
 
-    if (stateObj.media && stateObj.media.thumbnail) {
-        displayThumbnail({flag: true, type: 'picture', cb: function() {
+    if (tvApp.stateObj.media && tvApp.stateObj.media.thumbnail) {
+        Page.thumbnail.display({flag: true, type: 'picture', cb: function() {
             console.log(APP_INFO, TAG, 'Stage is prepared', prepareStage.prepared);
             if (!prepareStage.prepared) prepareStage();
         }});
     } else {
         if (!prepareStage.prepared) prepareStage();
-        displayLoading(true);
+        Page.loading.display(true);
     }
 
     function prepareStage() {
@@ -174,11 +184,11 @@ function displayImage() {
         console.log(APP_INFO, TAG, 'Load image: ', url);
         Utils.ui.setVendorStyle(picture, "Transform", "none");
 
-        preloadImg.src = "";//Stop loading previous picture
-        preloadImg.onload = null;
-        preloadImg.onerror = null;
+        tvApp.preloadImg.src = "";//Stop loading previous picture
+        tvApp.preloadImg.onload = null;
+        tvApp.preloadImg.onerror = null;
 
-        preloadImg.onload = function () {
+        tvApp.preloadImg.onload = function () {
             console.log(APP_INFO, TAG, 'Load image success: ', url, ' Display.');
             console.log(APP_INFO, TAG, 'Stage is prepared', prepareStage.prepared);
             if (!prepareStage.prepared) prepareStage();
@@ -187,20 +197,20 @@ function displayImage() {
             /*Here image is fully loaded and displayed*/
             if (hasOrientation) rotateImage(orientation);
 
-            displayThumbnail({flag: false});
-            displayLoading(false);
+            Page.thumbnail.display({flag: false});
+            Page.loading.display(false);
 
             if (senderId) {
                 var message = {
                     "event": "MEDIA_PLAYBACK",
-                    "message": stateObj.media && stateObj.media.url || "",
+                    "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                     "media_event": {"event": "loadcomplete"}
                 };
                 Utils.sendMessageToSender(senderId, message);
             }
         }
-        preloadImg.onerror = onLoadImageError;
-        preloadImg.src = url;
+        tvApp.preloadImg.onerror = onLoadImageError;
+        tvApp.preloadImg.src = url;
 
         function rotateImage(ori) {
             console.log(APP_INFO, TAG, 'rotateImage');
@@ -248,9 +258,9 @@ function displayImage() {
         console.log(APP_INFO, TAG, 'Load image error: ', url);
         console.log(APP_INFO, TAG, 'e', e);
 
-        displayThumbnail({flag: false}); // display a thumbnail
-        displayLoading(false);
-        displayHeader();
+        Page.thumbnail.display({flag: false}); // display a thumbnail
+        Page.loading.display(false);
+        Page.header.display();
         msg.innerHTML = e.detail && e.detail.msg || FAILED_TO_LOAD_MSG;
         msg.style.display = 'block';
 
@@ -276,36 +286,36 @@ function displayImage() {
  * @return {undefined} Result: control of a video playback (playback/pause of video).
  */
 function playPause(event) {
-    if (!stateObj.loadStarted) {
+    if (!tvApp.stateObj.loadStarted) {
         console.log(APP_INFO, '!loadStarted');
-        stateObj.loadStarted = true;
+        tvApp.stateObj.loadStarted = true;
 
-        switch(stateObj.media.type) {
+        switch(tvApp.stateObj.media.type) {
             case 'AUDIO':
                 clearStage({showLoader: false}); // reset a screen state by default
 
                 Utils.ui.viewManager.setView('media-player');
 
                 //checking if thumbnail is present is inside the following function
-                Utils.ui.setArtwork(playerContainer.querySelector(".artwork"), stateObj.media.thumbnail);
-                Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), stateObj);
+                Utils.ui.setArtwork(playerContainer.querySelector(".artwork"), tvApp.stateObj.media.thumbnail);
+                Utils.ui.setMediaInfo(playerContainer.querySelector(".info"), tvApp.stateObj);
                 //Utils.ui.updatePlayerCurtimeLabel();
-                displayHeader(); // display a header with Verizon logo
+                Page.header.display(); // display a header with Verizon logo
                 break;
             case 'VIDEO':
-                displayThumbnail({showLoading: true});
+                Page.thumbnail.display({showLoading: true});
                 break;
         }
 
         httpService.stop(); // cancel current HTTP-query
         player.stop(); // stop media playback
-        player.play(stateObj.media.url); // start media playback
+        player.play(tvApp.stateObj.media.url); // start media playback
     } else if (event == 'PAUSE' || event == 'RESUME') {
         console.log("Current view", Utils.ui.viewManager.getRecentViewInfo().mode);
 
         var COMMAND_NOT_VALID =
             Utils.ui.viewManager.getRecentViewInfo().mode !== 'media-player' &&
-            !stateObj.loadStarted;
+            !tvApp.stateObj.loadStarted;
 
         if (COMMAND_NOT_VALID) return;
 
@@ -321,7 +331,7 @@ function playPause(event) {
                 if (!senderId) return;
                 var message = {
                     "event": "MEDIA_PLAYBACK",
-                    "message": stateObj.media && stateObj.media.url || "",
+                    "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                     "media_event": { "event" : "resume" }
                 };
                 Utils.sendMessageToSender(senderId, message);
@@ -357,7 +367,7 @@ function onAbort() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "abort" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -366,13 +376,13 @@ function onAbort() {
 
 function onReadyToPlay(e) {
     console.log(APP_INFO, TAG, 'onReadyToPlay: ', e);
-    var media = stateObj.media;
+    var media = tvApp.stateObj.media;
 
     switch (media.type) {
         case "VIDEO":
             Utils.ui.viewManager.setView('media-player');
             if (media.thumbnail) playerContainer.setAttribute("poster", media.thumbnail);
-            displayThumbnail({flag: false});
+            Page.thumbnail.display({flag: false});
             break;
         case "AUDIO":
             playerContainer.querySelector('.artwork .loader').classList.remove('displayed');
@@ -401,7 +411,7 @@ function onCanplayThrough() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "canplaythrough" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -413,7 +423,7 @@ function onDurationChange(e) {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": {
                 "event": "durationchange",
                 "duration": e.detail && e.detail.duration || 0
@@ -427,7 +437,7 @@ function onErrorPlaying(e) {
     console.log(APP_INFO, TAG, 'onErrorPlaying: ', e);
 
     clearStage({showLoader: false}); // reset a screen state by default
-    displayHeader();
+    Page.header.display();
 
     msg.innerHTML = e.detail && e.detail.msg || e.detail.desc || FAILED_TO_LOAD_MSG;
     msg.style.display = 'block';
@@ -464,7 +474,7 @@ function onLoadedData() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "loadeddata" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -472,15 +482,15 @@ function onLoadedData() {
 }
 
 function onLoadedMetadata(e) {
-    var type = stateObj.media && stateObj.media.type,
+    var type = tvApp.stateObj.media && tvApp.stateObj.media.type,
         timeStr = "0:00";
     if (type =='AUDIO') {
-        stateObj.media.duration = e.detail.duration;
+        tvApp.stateObj.media.duration = e.detail.duration;
         var durtime = document.querySelector("#player-container .controls .durtime"),
             curtime = document.querySelector("#player-container .controls .curtime");
 
         curtime.innerHTML = timeStr;
-        if (stateObj.media.duration) timeStr = Utils.getTimeStr(stateObj.media.duration);
+        if (tvApp.stateObj.media.duration) timeStr = Utils.getTimeStr(tvApp.stateObj.media.duration);
         durtime.innerHTML = timeStr;
 
         Utils.ui.initPlayerStyles();
@@ -490,7 +500,7 @@ function onLoadedMetadata(e) {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "loadedmetadata" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -502,7 +512,7 @@ function onLoadstart() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "loadstart" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -514,7 +524,7 @@ function onPause() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "pause" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -526,7 +536,7 @@ function onPlay() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "play" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -538,7 +548,7 @@ function onPlaying() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "playing" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -550,7 +560,7 @@ function onProgress() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "progress" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -562,7 +572,7 @@ function onRatechange(e) {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": {
                 "event": "ratechange",
                 "playbackRate": e.detail && e.detail.playbackRate || 0
@@ -577,7 +587,7 @@ function onSeeked(e) {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": {
                 "event": "seeked",
                 "currentTime": e.detail && e.detail.currentTime || 0
@@ -592,7 +602,7 @@ function onSeeking(e) {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": {
                 "event": "seeking",
                 "currentTime": e.detail && e.detail.currentTime || 0
@@ -607,7 +617,7 @@ function onStalled() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "stalled" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -619,7 +629,7 @@ function onSuspend() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "suspend" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -627,11 +637,11 @@ function onSuspend() {
 }
 
 function onTimeupdate(e) {
-    var type = stateObj.media && stateObj.media.type;
+    var type = tvApp.stateObj.media && tvApp.stateObj.media.type;
     if (type =='AUDIO') {
-        if (!stateObj.media && !stateObj.media.duration) return;
-        if (stateObj.media.duration != e.detail.duration) {
-            console.log(APP_INFO, TAG, 'Duration has updated. Prev value: ', stateObj.media.duration, '. Cur value: ', e.detail.duration);
+        if (!tvApp.stateObj.media && !tvApp.stateObj.media.duration) return;
+        if (tvApp.stateObj.media.duration != e.detail.duration) {
+            console.log(APP_INFO, TAG, 'Duration has updated. Prev value: ', tvApp.stateObj.media.duration, '. Cur value: ', e.detail.duration);
             //Possible fix for VZMERA-79
             Utils.ui.updatePlayerStyles(e.detail.duration);
         }
@@ -644,14 +654,14 @@ function onTimeupdate(e) {
         progress.style.width = value + "px";
         tick.style.left = (value-1) + "px";// 1 - half of tick's width, minus to center element horizontally
 
-        stateObj.media.duration = e.detail.duration;
+        tvApp.stateObj.media.duration = e.detail.duration;
     }
 
     /* Send messages to Sender app*/
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": {
                 "event": "timeupdate",
                 "currentTime": e.detail && e.detail.currentTime || 0
@@ -666,7 +676,7 @@ function onVolumechange(e) {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": {
                 "event": "volume",
                 "volume": e.detail && e.detail.volume || 0
@@ -682,13 +692,13 @@ function onVolumechange(e) {
  * @return {undefined} Result: performing some actions for each content type.
  */
 function onEnded() {
-    var type = stateObj.media && stateObj.media.type;
+    var type = tvApp.stateObj.media && tvApp.stateObj.media.type;
     switch (type) {
         case 'AUDIO':
             //Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
             break;
         case 'VIDEO':
-            displayThumbnail({flag: true, type: 'video', cache: true}); // display a thumbnail
+            Page.thumbnail.display({flag: true, type: 'video', cache: true}); // display a thumbnail
             break;
     }
 
@@ -696,7 +706,7 @@ function onEnded() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "ended" }
         };
         Utils.sendMessageToSender(senderId, message);
@@ -708,173 +718,9 @@ function onWaiting() {
     if (senderId) {
         var message = {
             "event": "MEDIA_PLAYBACK",
-            "message": stateObj.media && stateObj.media.url || "",
+            "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
             "media_event": { "event" : "waiting" }
         };
         Utils.sendMessageToSender(senderId, message);
     }
 }
-
-/**
- * Display a header with Verizon logo.
- *
- * @return {undefined} Result: displaying a header.
- */
-function displayHeader() {
-    headband.classList.add('displayed');
-}
-
-/**
- * Display a headband screen.
- *
- * @param {boolean} flag Do you need display a headband screen?
- * @return {undefined} Result: show/hide a headband screen.
- */
-function displayHeadband(flag) {
-    var disp = 'displayed',
-        headbandEl = headband.querySelector('.headband'),
-        loadingEl = headband.querySelector('.loading');
-
-    if (flag) {
-        headband.classList.add(disp);
-        headbandEl.classList.add(disp);
-        loadingEl.classList.remove(disp);
-    } else {
-        headband.classList.remove(disp);
-        headbandEl.classList.remove(disp);
-        loadingEl.classList.remove(disp);
-    }
-}
-
-/**
- * Display a loading screen.
- *
- * @param {boolean} flag Do you need display a loading screen?
- * @return {undefined} Result: show/hide a loading screen.
- */
-function displayLoading(flag) {
-    var disp = 'displayed',
-        headbandEl = headband.querySelector('.headband'),
-        loadingEl = headband.querySelector('.loading');
-
-    if (flag) {
-        headband.classList.add(disp);
-        loadingEl.classList.add(disp);
-        headbandEl.classList.remove(disp);
-    } else {
-        headband.classList.remove(disp);
-        loadingEl.classList.remove(disp);
-        headbandEl.classList.remove(disp);
-    }
-}
-
-/**
- * Display a thumbnail.
- *
- * @argument {object}   opt             Options, extracts from arguments array
- * @param {boolean}     opt.flag        Do you need display a thumbnail?
- * @param {boolean}     opt.showLoading Display thumbnail with loading spinner? (It's implied thumbnail is shown already)
- * @param {boolean}     opt.type        Display thumbnail either for 'video' or 'picture'
- * @param {Function}    opt.cb          Callback: apply changes when thumbnail is loaded and ready to be displayed
- * @param {boolean}     opt.cache       Do you need get thumbnail from cache?
- *
- * @return {undefined}  Result: display a thumbnail.
- */
-function displayThumbnail() {
-    var opt = arguments[0] && (typeof arguments[0] === 'object') && arguments[0] || {},
-        flag =          opt.flag === undefined || opt.flag === null ? true : opt.flag,
-        showLoading =   opt.showLoading,
-        type =          opt.type,
-        cb =            opt.cb,
-        cache =         opt.cache;
-
-    console.log(TAG, APP_INFO, 'displayThumbnail', flag);
-    var disp = 'displayed',
-        thumbnailUrl = stateObj.media.thumbnail,
-        DEFAULT_THUMBNAIL = {
-            video:      'images/song-default@3x.png',
-            picture:    'images/song-default@3x.png',
-            default:    'images/song-default@3x.png'
-        };
-
-    if (!flag) {
-        displayThumbnail.preloadThumb.src = "";
-        displayThumbnail.preloadThumb.onload = null;
-        displayThumbnail.preloadThumb.onerror = null;
-        videoThumbnail.classList.remove(disp);
-        return;
-    }
-
-    if (showLoading) {
-        //It's implied thumbnail is shown already
-        videoThumbnail.querySelector('.play-button').classList.remove(disp);
-        videoThumbnail.querySelector('.loading').classList.add(disp);
-        return;
-    }
-
-    if (cache) {
-        videoThumbnail.querySelector('.play-button').classList.add(disp);
-        videoThumbnail.querySelector('.loading').classList.remove(disp);
-
-        videoThumbnail.classList.add(disp);
-        return;
-    }
-
-    thumbnailUrl = thumbnailUrl || DEFAULT_THUMBNAIL[type] || DEFAULT_THUMBNAIL.default;
-    display(thumbnailUrl);
-
-    /**
-     * Display a thumbnail.
-     *
-     * @param {string} thumbnail URL of thumbnail.
-     * @return {undefined} Result: displaying a thumbnail.
-     */
-    function display(thumbnail) {
-        displayThumbnail.preloadThumb.src = "";
-        displayThumbnail.preloadThumb.onload = function() {
-            console.log(TAG, APP_INFO, 'Thumbnail is loaded');
-            updateThumbnailPageStyles();
-            videoThumbnail.querySelector('.thumbnail').style.backgroundImage = 'url(' + thumbnail + ')';
-            cb && cb();
-        }
-        displayThumbnail.preloadThumb.onerror = function() {
-            console.log(TAG, APP_INFO, 'Thumbnail load error');
-            if (thumbnailUrl !== DEFAULT_THUMBNAIL[type] && thumbnailUrl !== DEFAULT_THUMBNAIL.default) {
-                displayDefaultThumbnail();
-            } else {
-                updateThumbnailPageStyles();
-                cb && cb();
-            }
-        }
-        displayThumbnail.preloadThumb.src = thumbnail;
-    }
-
-    function updateThumbnailPageStyles() {
-        videoThumbnail.classList.add(disp);
-        switch(type) {
-            case 'video':
-                videoThumbnail.querySelector('.play-button').classList.add(disp);
-                videoThumbnail.querySelector('.loading').classList.remove(disp);
-
-                preloadImg.src = "";
-                preloadImg.onload = null;
-                preloadImg.onerror = null;
-                break;
-            case 'picture':
-            default:
-                videoThumbnail.querySelector('.play-button').classList.remove(disp);
-                videoThumbnail.querySelector('.loading').classList.add(disp);
-                break;
-        }
-    }
-
-    /**
-     * Display default thumbnail.
-     */
-    function displayDefaultThumbnail() {
-        thumbnailUrl = DEFAULT_THUMBNAIL[type] || DEFAULT_THUMBNAIL.default;
-        display(thumbnailUrl);
-    }
-}
-displayThumbnail.preloadThumb = new Image();
-

@@ -163,7 +163,7 @@ var Utils = (function(){
                     break;
                 case 'media-player':
                     playerContainer.style.display = 'block';
-                    displayLoading(false); // display a loading screen
+                    Page.loading.display(false); // display a loading screen
                     break;
             }
         };
