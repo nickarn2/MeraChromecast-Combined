@@ -27,7 +27,7 @@ https://bamboo.synchronoss.net:8443/browse/SYNCDH-CC
 
 **Important: Make sure to match the build version in the `js/config.js` file with the `vars.txt` variable.**
 
-** VERY IMPORTANT: IF YOU RUN THE BAMBOO BUILD WITHOUT UPDATING THE VERSION, IT WILL OVERWRITE WHAT IS IN NEXUS (AND THEREFORE WHAT HAS BEEN PREVIOUSLY DEPLOYED TO PRODUCTION) **
+**VERY IMPORTANT: IF YOU RUN THE BAMBOO BUILD WITHOUT UPDATING THE VERSION, IT WILL OVERWRITE WHAT IS IN NEXUS (AND THEREFORE WHAT HAS BEEN PREVIOUSLY DEPLOYED TO PRODUCTION)**
 
 ## Nexus
 The Chromecast HTML5 app archive is in the CTS Releases repository groupId: com.synchronoss.verizon.cloud & artifactId: chromecast.
