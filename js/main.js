@@ -95,6 +95,8 @@ window.onload = function() {
                 }
             } else if ( event == "RESUME" || event == "PAUSE" ) {
                 playPause(event); // control of a video playback
+            } else if ( event == "STOP_MEDIA" ) {
+                stopMedia();
             }
         } catch (event) {
             console.log(APP_INFO, TAG, 'Parse message error: ', event);
@@ -338,6 +340,29 @@ function playPause(event) {
                 break;
         }
     }
+}
+
+/**
+ * Stop media
+ */
+function stopMedia() {
+    console.log(APP_INFO, TAG, 'stop_media');
+
+    if (senderId) {
+        var message = {
+            "event": "MEDIA_PLAYBACK",
+            "media_event": { "event" : "mediastopped" }
+        };
+        Utils.sendMessageToSender(senderId, message);
+    }
+
+    player.stop();
+    tvApp.preloadImg.src = "";
+    tvApp.preloadImg.onload = null;
+    tvApp.preloadImg.onerror = null;
+
+    clearStage({showLoader: false, showThumbnail: false});
+    Page.headband.display(true);
 }
 
 document.addEventListener('gc:abort', onAbort, false);

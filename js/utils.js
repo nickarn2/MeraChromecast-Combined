@@ -56,8 +56,14 @@ var Utils = (function(){
         progress.style.width = "0px";
         tick.style.left = "-1px";
         controls.style.display = "inline-block";// ***
+        durLabel.style.width = "0px";/*
+            Fix for VZMERA-131;
+            We could remove the setting of width and use scrollWidth value instead of offsetWidth here like it's done for Tizen to fix the issue.
+            But in this case (auto width calculation) GCast renders element with math error (about 0.5px wider) in comparison with actual size.
+            So we have to reset width to 0,get scrollWidth and then set it to the new width like it's done below
+        */
 
-        var durLabelWidth =     durLabel.offsetWidth;//Get this after controls are displayed (ref to ***)
+        var durLabelWidth = durLabel.scrollWidth;//Get this after controls are displayed (ref to ***)
         progressBar.style.width = controlsWidth - durLabelWidth*2 + "px";
         durLabel.style.width = durLabelWidth + "px";
         curLabel.style.width = durLabelWidth + "px";
@@ -73,6 +79,7 @@ var Utils = (function(){
     function updatePlayerStyles(duration) {
         var playerContainer = document.getElementById('player-container'),
             durLabel = playerContainer.querySelector(".controls .durtime"),
+            curLabel = playerContainer.querySelector('.controls .curtime'),
             progressBar = playerContainer.querySelector('.controls .progress-bar'),
             controlsWidth = Math.ceil(playerContainer.offsetHeight / 2);
 
@@ -80,6 +87,7 @@ var Utils = (function(){
         durLabel.innerHTML = timeStrUpdated;
 
         var durLabelWidth = durLabel.scrollWidth;
+        curLabel.style.width = durLabelWidth + "px";
         durLabel.style.width = durLabelWidth + "px";
         progressBar.style.width = controlsWidth - durLabelWidth*2 + "px";
     }
