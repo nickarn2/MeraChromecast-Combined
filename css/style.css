@@ -13,6 +13,9 @@ body {
 }
 
 /* common styles (begin) */
+.page {
+    display: none !important;
+}
 .displayed {
     display: block !important;
 }
@@ -24,10 +27,7 @@ body {
     width: 100%;
     height: 100%;
 }
-#headband {
-    display: none;
-}
-#headband * {
+.fullpage-bg * {
     box-sizing: content-box !important;
 }
 .header-headband {
@@ -184,10 +184,10 @@ body {
 }
 #thumbnail .play-button {
     display: none;
-    background-image: url('../images/video-play.png');
+    background-image: url('../images/video-play.png') no-repeat;
     background-size: auto 18%;
-    background-repeat: no-repeat;
     background-position: 50% 50%;
+    background-repeat: no-repeat;
     position: absolute;
     top: 0;
     left: 0;
@@ -237,7 +237,7 @@ body {
 /* Video Thumbnail page (end) */
 
 /* Messages (begin) */
-#cast-msg span {
+#message span {
     background: #fff;
     opacity: 0.8;
     border-radius: 0.8em;
@@ -245,15 +245,182 @@ body {
 }
 /* Messages (end) */
 
+#pictures {
+    width: 100%;
+    height: 100%;
+}
+
+.picture-container {
+    opacity: 1;
+    background-color: #fff;
+
+    -webkit-animation-fill-mode: forwards;
+       -moz-animation-fill-mode: forwards;
+         -o-animation-fill-mode: forwards;
+            animation-fill-mode: forwards;
+
+    -webkit-animation-timing-function: linear;
+       -moz-animation-timing-function: linear;
+         -o-animation-timing-function: linear;
+            animation-timing-function: linear;
+}
+
+/*** FADE OUT ANIMATION ***/
+@-webkit-keyframes fadeOut {
+    to { opacity: 0; }
+}
+@-moz-keyframes fadeOut {
+    to { opacity: 0; }
+}
+@-o-keyframes fadeOut {
+    to { opacity: 0; }
+}
+@keyframes fadeOut {
+    to { opacity: 0; }
+}
+.picture-container.fadeOut {
+    -webkit-animation-name: fadeOut;
+       -moz-animation-name: fadeOut;
+         -o-animation-name: fadeOut;
+            animation-name: fadeOut;
+}
+
+/*** ROTATE ANIMATION ***/
+@-webkit-keyframes rotateZoomOut {
+    to { -webkit-transform: rotate(360deg) scale(0); }
+}
+@-moz-keyframes rotateZoomOut {
+    to { -moz-transform: rotate(360deg) scale(0); }
+}
+@-o-keyframes rotateZoomOut {
+    to { -o-transform: rotate(360deg) scale(0); }
+}
+@keyframes rotateZoomOut {
+    to { transform: rotate(360deg) scale(0); }
+}
+.picture-container.rotateZoomOut {
+    -webkit-animation-name: rotateZoomOut;
+       -moz-animation-name: rotateZoomOut;
+         -o-animation-name: rotateZoomOut;
+            animation-name: rotateZoomOut;
+    background-color: transparent;
+}
+
+/*** ZOOM_CORNER ANIMATION ***/
+@-webkit-keyframes zoomCornerOut {
+    from { -webkit-transform: scale(1,1); -webkit-transform-origin: bottom left;}
+    to { -webkit-transform: scale(0,0); -webkit-transform-origin: bottom left;}
+}
+@-moz-keyframes zoomCornerOut {
+    from { -moz-transform: scale(1,1); -moz-transform-origin: bottom left;}
+    to { -moz-transform: scale(0,0); -moz-transform-origin: bottom left;}
+}
+@-o-keyframes zoomCornerOut {
+    from { -o-transform: scale(1,1); -o-transform-origin: bottom left;}
+    to { -o-transform: scale(0,0); -o-transform-origin: bottom left;}
+}
+@keyframes zoomCornerOut {
+    from { transform: scale(1,1); transform-origin: bottom left;}
+    to { transform: scale(0,0); transform-origin: bottom left;}
+}
+.picture-container.zoomCornerOut {
+    -webkit-animation-name: zoomCornerOut;
+       -moz-animation-name: zoomCornerOut;
+         -o-animation-name: zoomCornerOut;
+            animation-name: zoomCornerOut;
+    background-color: transparent;
+}
+
+@-webkit-keyframes zoomCornerIn {
+    from { -webkit-transform: scale(0,0); -webkit-transform-origin: top right;}
+    to { -webkit-transform: scale(1,1); -webkit-transform-origin: top right;}
+}
+@-moz-keyframes zoomCornerIn {
+    from { -moz-transform: scale(0,0); -moz-transform-origin: top right;}
+    to { -moz-transform: scale(1,1); -moz-transform-origin: top right;}
+}
+@-o-keyframes zoomCornerIn {
+    from { -o-transform: scale(0,0); -o-transform-origin: top right;}
+    to { -o-transform: scale(1,1); -o-transform-origin: top right;}
+}
+@keyframes zoomCornerIn {
+    from { transform: scale(0,0); transform-origin: top right;}
+    to { transform: scale(1,1); transform-origin: top right;}
+}
+.picture-container.zoomCornerIn {
+    -webkit-animation-name: zoomCornerIn;
+       -moz-animation-name: zoomCornerIn;
+         -o-animation-name: zoomCornerIn;
+            animation-name: zoomCornerIn;
+    background-color: transparent;
+}
+
+/*** ZOOM_CENTER ANIMATION ***/
+@-webkit-keyframes zoomCenterOut {
+    from { -webkit-transform: scale(1,1); opacity: 1;}
+    to { -webkit-transform: scale(0,0); opacity: 0;}
+}
+@-moz-keyframes zoomCenterOut {
+    from { -moz-transform: scale(1,1); opacity: 1;}
+    to { -moz-transform: scale(0,0); opacity: 0;}
+}
+@-o-keyframes zoomCenterOut {
+    from { -o-transform: scale(1,1); opacity: 1;}
+    to { -o-transform: scale(0,0); opacity: 0;}
+}
+@keyframes zoomCenterOut {
+    from { transform: scale(1,1); opacity: 1;}
+    to { transform: scale(0,0); opacity: 0;}
+}
+
+@-webkit-keyframes zoomCenterIn {
+    from { -webkit-transform: scale(0,0); opacity: 0;}
+    to { -webkit-transform: scale(1,1); opacity: 1;}
+}
+@-moz-keyframes zoomCenterIn {
+    from { -moz-transform: scale(0,0); opacity: 0;}
+    to { -moz-transform: scale(1,1); opacity: 1;}
+}
+@-o-keyframes zoomCenterIn {
+    from { -o-transform: scale(0,0); opacity: 0;}
+    to { -o-transform: scale(1,1); opacity: 1;}
+}
+@keyframes zoomCenterIn {
+    from { transform: scale(0,0); opacity: 0;}
+    to { transform: scale(1,1); opacity: 1;}
+}
+.picture-container.zoomCenterOut {
+    -webkit-animation-name: zoomCenterOut;
+       -moz-animation-name: zoomCenterOut;
+         -o-animation-name: zoomCenterOut;
+            animation-name: zoomCenterOut;
+    background-color: transparent;
+}
+.picture-container.zoomCenterIn {
+    -webkit-animation-name: zoomCenterIn;
+       -moz-animation-name: zoomCenterIn;
+         -o-animation-name: zoomCenterIn;
+            animation-name: zoomCenterIn;
+    background-color: transparent;
+}
+
+.picture-container.hidden {
+    visibility: hidden;
+}
+
 .fullscreen-picture {
     width: 100%;
     height: 100%;
 
     text-align: center;
     font-size: 20pt;
+
+    top: 0;
+    left: 0;
+    position: absolute;
 }
 
-#picture {
+.picture-container .picture {
     width: 100%;
     height: 100%;
     background-repeat: no-repeat;
@@ -295,7 +462,7 @@ body {
 }
 
 #player-container,
-#vid.fullscreen {
+#html5-player.fullscreen {
     width: 100%;
     height: 100%;
 }

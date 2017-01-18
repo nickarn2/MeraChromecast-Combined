@@ -6,17 +6,22 @@
  */
 var Page = (function(){
 
-    var TAG = "Page",
-        APP_INFO = "v" + Config.app.version + " " + Config.app.tv_type + " : ",
-        tvApp = null;
+    var TAG = "Page";
 
     /**
      * Display a header with Verizon logo.
-     *
+     * @param {boolean} flag Show/hide header?
      * @return {undefined} Result: displaying a header.
      */
-    function displayHeader() {
-        tvApp.headband.classList.add('displayed');
+    function displayHeader(flag) {
+        var disp = 'displayed',
+        header = tvApp.header;
+
+        if (flag) {
+            header.addClass(disp);
+        } else {
+            header.removeClass(disp);
+        }
     }
 
     /**
@@ -27,18 +32,12 @@ var Page = (function(){
      */
     function displayHeadband(flag) {
         var disp = 'displayed',
-            headband = tvApp.headband,
-            headbandEl = headband.querySelector('.headband'),
-            loadingEl = headband.querySelector('.loading');
+        headband = tvApp.headband;
 
         if (flag) {
-            headband.classList.add(disp);
-            headbandEl.classList.add(disp);
-            loadingEl.classList.remove(disp);
+            headband.addClass(disp);
         } else {
-            headband.classList.remove(disp);
-            headbandEl.classList.remove(disp);
-            loadingEl.classList.remove(disp);
+            headband.removeClass(disp);
         }
     }
 
@@ -50,18 +49,12 @@ var Page = (function(){
      */
     function displayLoading(flag) {
         var disp = 'displayed',
-            headband = tvApp.headband,
-            headbandEl = headband.querySelector('.headband'),
-            loadingEl = headband.querySelector('.loading');
+            loadingPage = tvApp.loading;
 
         if (flag) {
-            headband.classList.add(disp);
-            loadingEl.classList.add(disp);
-            headbandEl.classList.remove(disp);
+            loadingPage.addClass(disp);
         } else {
-            headband.classList.remove(disp);
-            loadingEl.classList.remove(disp);
-            headbandEl.classList.remove(disp);
+            loadingPage.removeClass(disp);
         }
     }
 
@@ -80,17 +73,17 @@ var Page = (function(){
     function displayThumbnail() {
         var opt = arguments[0] && (typeof arguments[0] === 'object') && arguments[0] || {},
             flag =          opt.flag === undefined || opt.flag === null ? true : opt.flag,
+            loadThumb =     opt.loadThumb === undefined || opt.flag === null ? false : opt.loadThumb,
+            withSpinner =   opt.withSpinner === undefined || opt.withSpinner === null ? false : opt.withSpinner,
+            showOnlyThumb = opt.showOnlyThumb === undefined || opt.flag === null ?false: opt.showOnlyThumb,
             showLoading =   opt.showLoading,
             type =          opt.type,
             cb =            opt.cb,
             cache =         opt.cache;
 
-        var videoThumbnail = tvApp.videoThumbnail,
-            preloadImg = tvApp.preloadImg,
-            stateObj = tvApp.stateObj;
-
-        console.log(TAG, APP_INFO, 'displayThumbnail', flag);
+        console.log(Constants.APP_INFO, TAG, 'displayThumbnail', flag);
         var disp = 'displayed',
+            videoThumbnail = tvApp.videoThumbnail,
             thumbnailUrl = tvApp.stateObj.media.thumbnail,
             DEFAULT_THUMBNAIL = {
                 video:      'images/song-default@3x.png',
@@ -102,22 +95,26 @@ var Page = (function(){
             displayThumbnail.preloadThumb.src = "";
             displayThumbnail.preloadThumb.onload = null;
             displayThumbnail.preloadThumb.onerror = null;
-            videoThumbnail.classList.remove(disp);
+            videoThumbnail.removeClass(disp);
             return;
         }
 
         if (showLoading) {
             //It's implied thumbnail is shown already
-            videoThumbnail.querySelector('.play-button').classList.remove(disp);
-            videoThumbnail.querySelector('.loading').classList.add(disp);
+            videoThumbnail.find('.play-button').removeClass(disp);
+            videoThumbnail.find('.loading').addClass(disp);
             return;
         }
 
         if (cache) {
-            videoThumbnail.querySelector('.play-button').classList.add(disp);
-            videoThumbnail.querySelector('.loading').classList.remove(disp);
+            videoThumbnail.find('.loading').removeClass(disp);
+            if (showOnlyThumb) {
+                videoThumbnail.find('.play-button').removeClass(disp);
+            } else {
+                videoThumbnail.find('.play-button').addClass(disp);
+            }
 
-            videoThumbnail.classList.add(disp);
+            videoThumbnail.addClass(disp);
             return;
         }
 
@@ -133,13 +130,13 @@ var Page = (function(){
         function display(thumbnail) {
             displayThumbnail.preloadThumb.src = "";
             displayThumbnail.preloadThumb.onload = function() {
-                console.log(TAG, APP_INFO, 'Thumbnail is loaded');
-                updateThumbnailPageStyles();
-                videoThumbnail.querySelector('.thumbnail').style.backgroundImage = 'url(' + thumbnail + ')';
+                console.log(Constants.APP_INFO, TAG, 'Thumbnail is loaded');
+                if (!loadThumb) updateThumbnailPageStyles();
+                videoThumbnail.find('.thumbnail').css('background-image', 'url(' + thumbnail + ')');
                 cb && cb();
             }
             displayThumbnail.preloadThumb.onerror = function() {
-                console.log(TAG, APP_INFO, 'Thumbnail load error');
+                console.log(Constants.APP_INFO, TAG, 'Thumbnail load error');
                 if (thumbnailUrl !== DEFAULT_THUMBNAIL[type] && thumbnailUrl !== DEFAULT_THUMBNAIL.default) {
                     displayDefaultThumbnail();
                 } else {
@@ -151,20 +148,23 @@ var Page = (function(){
         }
 
         function updateThumbnailPageStyles() {
-            videoThumbnail.classList.add(disp);
+            videoThumbnail.addClass('displayed');
             switch(type) {
                 case 'video':
-                    videoThumbnail.querySelector('.play-button').classList.add(disp);
-                    videoThumbnail.querySelector('.loading').classList.remove(disp);
+                    if (withSpinner) {
+                        videoThumbnail.find('.play-button').removeClass(disp);
+                        videoThumbnail.find('.loading').addClass(disp);
+                    } else {
+                        videoThumbnail.find('.play-button').addClass(disp);
+                        videoThumbnail.find('.loading').removeClass(disp);
+                    }
 
-                    preloadImg.src = "";
-                    preloadImg.onload = null;
-                    preloadImg.onerror = null;
+                    PictureManager.stopLoading();
                     break;
                 case 'picture':
                 default:
-                    videoThumbnail.querySelector('.play-button').classList.remove(disp);
-                    videoThumbnail.querySelector('.loading').classList.add(disp);
+                    videoThumbnail.find('.play-button').removeClass(disp);
+                    videoThumbnail.find('.loading').addClass(disp);
                     break;
             }
         }
@@ -179,10 +179,44 @@ var Page = (function(){
     }
     displayThumbnail.preloadThumb = new Image();
 
+    /**
+     * Display a message ("Paused", errors).
+     *
+     * @param {boolean} flag Do you need display a message?
+     * @return {undefined} Result: display a message.
+     */
+    function displayMessage(flag) {
+        var disp = 'displayed';
+
+        if (flag !== false) {
+            tvApp.message.addClass(disp);
+        } else {
+            tvApp.message.removeClass(disp);
+        }
+    }
+
+    /**
+     * Display picture.
+     *
+     * @argument {object}   opt             Options, extracts from arguments array
+     * @param {boolean}     opt.flag        Do you need display a picture?
+     * @param {boolean}     opt.elem        Jquery element (picture container) to be displayed
+     *
+     * @return {undefined}  Result: display/hide a picture.
+     */
+    function displayPicture() {
+        var opt = arguments[0] && (typeof arguments[0] === 'object') && arguments[0] || {},
+            flag = opt.flag === undefined || opt.flag === null ? true : opt.flag,
+            elem = opt.elem,
+            disp = 'displayed';
+
+        if (!elem) return;
+
+        if (flag) elem.addClass(disp);
+        else elem.removeClass(disp);
+    }
+
     return {
-        init: function(_tvApp) {
-            tvApp = _tvApp;
-        },
         header: {
             display: displayHeader
         },
@@ -194,6 +228,16 @@ var Page = (function(){
         },
         thumbnail: {
             display: displayThumbnail
+        },
+        message: {
+            set: function(msg) {
+                tvApp.message.find('.message').html(msg);
+                return this;
+            },
+            display: displayMessage
+        },
+        picture: {
+            display: displayPicture
         }
     }
 

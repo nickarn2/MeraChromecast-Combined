@@ -6,9 +6,7 @@
  * @returns {Object}
  */
 function HttpService() {
-    var TAG = "Smartview",
-        APP_INFO = "v" + Config.app.version + " " + Config.app.tv_type + " : ",
-        STATUS_TEXT = {
+    var STATUS_TEXT = {
             TIMED_OUT: "Request timed out"
         };
     var httpRequest = new XMLHttpRequest();
@@ -31,18 +29,18 @@ function HttpService() {
                 mime = media.mime,
                 that = this;
 
-            console.log(APP_INFO, TAG, 'getAuthResource url', url);
-            console.log(APP_INFO, TAG, 'getAuthResource parameters', parameters);
+            console.log(Constants.APP_INFO, 'getAuthResource url', url);
+            console.log(Constants.APP_INFO, 'getAuthResource parameters', parameters);
 
             var headers = parameters && parameters.headers,
                 body = parameters && parameters.body;
 
             httpRequest.onreadystatechange = function() {
-                console.log(APP_INFO, TAG, 'onreadystatechange', httpRequest);
+                console.log(Constants.APP_INFO, 'onreadystatechange', httpRequest);
                 if (httpRequest.readyState == 4 ) {
                     switch ( httpRequest.status ) {
                         case 200://OK
-                            console.log(APP_INFO, TAG, 'httpRequest success');
+                            console.log(Constants.APP_INFO, 'httpRequest success');
                             var objType;
                             switch (type) {
                                 case "PICTURE":
@@ -54,11 +52,11 @@ function HttpService() {
                             var blb = new Blob([httpRequest.response], objType);
                             var respUrl = (window.URL || window.webkitURL).createObjectURL(blb);
                             that.respUrl = respUrl;
-                            console.log(APP_INFO, TAG, 'url', respUrl);
+                            console.log(Constants.APP_INFO, 'url', respUrl);
                             callbackSuccess && callbackSuccess(null, respUrl, httpRequest.response);
                             break;
                         case 0:
-                            console.log(APP_INFO, TAG, 'httpRequest aborted');
+                            console.log(Constants.APP_INFO, 'httpRequest aborted');
                             /*
                              * Mostly this calls when CORS error occurs
                              * (in case of remote images from other domain and without authorization
@@ -68,7 +66,7 @@ function HttpService() {
                             callbackSuccess();
                             break;
                         default://ERRORS
-                            console.log(APP_INFO, TAG, 'httpRequest error');
+                            console.log(Constants.APP_INFO, 'httpRequest error');
                             var description = httpRequest.statusText.length == 0 ? httpRequest.errorString : httpRequest.statusText,
                                 e = {
                                     detail: {
@@ -87,14 +85,14 @@ function HttpService() {
                 var params = "";
                 for(var key in body) {
                     if (body.hasOwnProperty(key)) {
-                        console.log(APP_INFO, TAG, "body key " + key + ", value is" + body[key]);
+                        console.log(Constants.APP_INFO, "body key " + key + ", value is" + body[key]);
                         var pair = key + "=" + body[key];
                         params += params == "" ? "?"+pair : "&"+pair;
                     }
                 }
                 if ( params != "" ) {
                     url += params;
-                    console.log(APP_INFO, TAG, 'get url with params', url);
+                    console.log(Constants.APP_INFO, 'get url with params', url);
                 }
             }
 
@@ -105,7 +103,7 @@ function HttpService() {
             function setHeaders(headers) {
                 for(var key in headers) {
                     if (headers.hasOwnProperty(key)) {
-                        console.log(APP_INFO, TAG, "header key " + key + ", value is" + headers[key]);
+                        console.log(Constants.APP_INFO, "header key " + key + ", value is" + headers[key]);
                         httpRequest.setRequestHeader(key, headers[key]);
                     }
                 }
@@ -114,17 +112,17 @@ function HttpService() {
         /**
          * Cancel current HTTP-query.
          *
-         * @return {object} Current class instance.
+         * @return {undefined}
          */
         stop: function() {
-            console.log(APP_INFO, TAG, 'stop httpRequest');
+            console.log(Constants.APP_INFO, 'stop httpRequest');
             httpRequest.onreadystatechange = null;
             httpRequest.abort();
             if (this.respUrl) {
                 var windowURL = window.URL || window.webkitURL;
-                console.log(APP_INFO, TAG, 'windowURL', windowURL);
+                console.log(Constants.APP_INFO, 'windowURL', windowURL);
                 if (!windowURL) return;
-                console.log(APP_INFO, TAG, "windowURL.revokeObjectURL url", this.respUrl);
+                console.log(Constants.APP_INFO, "windowURL.revokeObjectURL url", this.respUrl);
                 windowURL.revokeObjectURL(this.respUrl);
                 this.respUrl = null;
             }

@@ -6,12 +6,17 @@
         <title>Verizon Synchronoss App</title>
     </head>
     <body>
-        <div id="headband" class="fullpage-bg">
+        <div id="header" class="fullpage-bg page">
+            <div class="header-headband">
+                <div class="logo"></div>
+            </div>
+        </div>
+        <div id="headband" class="fullpage-bg page displayed">
             <div class="header-headband">
                 <div class="logo"></div>
             </div>
             <div class="content-headband">
-                <div class="headband">
+                <div class="headband displayed">
                     <div class="content-welcome">
                         <div>
                             <img src="./images/cloud-logo.svg">
@@ -23,7 +28,14 @@
                         <img src="./images/device-example.svg">
                     </div>
                 </div>
-                <div class="loading">
+            </div>
+        </div>
+        <div id="loading" class="fullpage-bg page">
+            <div class="header-headband">
+                <div class="logo"></div>
+            </div>
+            <div class="content-headband">
+                <div class="loading displayed">
                     <div class="loading-cloud-logo">
                         <img src="./images/cloud-logo.svg">
                         <span> Cloud View </span>
@@ -35,7 +47,7 @@
                 </div>
             </div>
         </div>
-        <div id="thumbnail">
+        <div id="thumbnail" class="page">
             <div class="thumbnail"> </div>
             <div class="play-button"> </div>
             <div class="loading">
@@ -44,12 +56,16 @@
                 </div>
             </div>
         </div>
-        <div id="picture-container" class="fullscreen-picture">
-            <div id="picture"></div>
-            <div id="msg" class="centeredY"></div>
+        <div id="pictures" class="page">
+            <div id="picture-2" class="picture-container fullscreen-picture">
+                <div class="picture"></div>
+            </div>
+            <div id="picture-1" class="picture-container fullscreen-picture">
+                <div class="picture"></div>
+            </div>
         </div>
-        <div id="player-container">
-            <video id="vid" class="fullscreen" autoplay></video>
+        <div id="player-container" class="page">
+            <video id="html5-player" class="fullscreen" autoplay></video>
 
             <div class="info-box">
                 <div class="artwork">
@@ -73,11 +89,14 @@
             </div>
         </div>
 
-        <div class="overlay">
-            <div id="cast-msg" class="centeredY"></div>
+        <audio id="soundtrack" loop></audio>
+
+        <div id="message" class="overlay page">
+            <div class="message centeredY"></div>
         </div>
 
         <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+        <script src="libs/jquery-3.1.0.min.js"></script>
         <!--
             exif.js : vendor library
             we've modified error handling: ref to comments with prefix *Modified*
@@ -85,10 +104,19 @@
         <script src="libs/exif.js"></script>
 
         <script src="js/config.js"></script>
+        <script src="js/constants.js"></script>
         <script src="js/utils.js"></script>
+        <script src="js/fastcast.js"></script>
         <script src="js/pages.js"></script>
-        <script src="js/mediaPlayer.js"></script>
         <script src="js/httpService.js"></script>
+        <script src="js/Animation.js"></script>
+        <script src="js/Picture.js"></script>
+        <script src="js/pictureManager.js"></script>
         <script src="js/main.js"></script>
+        <!--Media Player: add after main.js-->
+        <script src="js/player/mPlayerCallbacks.js"></script>
+        <script src="js/player/MediaPlayer.js"></script>
+        <script src="js/player/Soundtrack.js"></script>
+        <script src="js/player/VisualMediaPlayer.js"></script>
     </body>
 </html>

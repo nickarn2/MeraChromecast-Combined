@@ -1,4 +1,4 @@
-VERSION=1.9.8
+VERSION=2.0.2
 HTMLAPP=chromecast
 BUILD_DIR=build/
 BUILD_APP_DIR=build/$HTMLAPP/
