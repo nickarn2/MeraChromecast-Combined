@@ -20,6 +20,7 @@ function Soundtrack(config) {
     self.loaded = false;
     self.error = false;
     self.stopped = false;
+    self.lastCurrentTime = 0;
     self.setCallback = function(cb) {
         self._log('setCallback', typeof cb);
         callback = cb;
@@ -66,6 +67,7 @@ function Soundtrack(config) {
 
     var parentStop = self.stop;
     self.stop = function() {
+        if (self._player.currentTime > 0) self.lastCurrentTime = self._player.currentTime;
         parentStop();
         clearTimeout(timeoutFn);
         self.unregisterEvents();
@@ -150,6 +152,11 @@ function Soundtrack(config) {
 
     function onLoadedMetadata(e) {
         self._log('event: loadedmetadata: duration:'+self._player.duration);
+
+        if (self.lastCurrentTime > 0) {
+            self._log('seek to: ' + self.lastCurrentTime);
+            self._player.currentTime = self.lastCurrentTime;
+        }
     }
 
     function onLoadstart() {

@@ -39,12 +39,12 @@ var mPlayerCallbacks = {
         function onCanplay(e) {
             console.log(Constants.APP_INFO, TAG, 'onCanplay: ', e);
             var media = tvApp.stateObj.media;
-            if (tvApp.slideshow.isTurnedOn) tvApp.slideshow.slide++;
-            tvApp.slideshow.turnOffCustomSlideshow();
+            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadComplete();
 
             switch (media.type) {
                 case "VIDEO":
-                    if (tvApp.slideshow.isTurnedOn) {
+                    if (tvApp.slideshow.started) {
+                        tvApp.soundtrack.stop();
                         tvApp.clearStage({showLoader: false, showCastMsg: true});
                         Page.picture.display({flag: false, elem: $('#pictures')});
 
@@ -55,10 +55,13 @@ var mPlayerCallbacks = {
                     Page.thumbnail.display({flag: false});
                     break;
                 case "AUDIO":
-                    if (tvApp.slideshow.isTurnedOn && !tvApp.slideshow.isCustom) {
-                        tvApp.clearStage({showLoader: false, showCastMsg: true});
-                        tvApp.showAudioPage();
-                        Utils.ui.updatePlayerStyles();
+                    if (tvApp.slideshow.started) {
+                        tvApp.soundtrack.stop();
+                        if (!tvApp.slideshow.custom) {
+                            tvApp.clearStage({showLoader: false, showCastMsg: true});
+                            tvApp.showAudioPage();
+                            Utils.ui.updatePlayerStyles();
+                        }
                     }
                     tvApp.playerContainer.find('.artwork .loader').removeClass('displayed');
                     break;
@@ -106,13 +109,13 @@ var mPlayerCallbacks = {
         function onErrorPlaying(e) {
             console.log(Constants.APP_INFO, TAG, 'onErrorPlaying: ', e);
 
-            if (!tvApp.slideshow.isTurnedOn) {
+            if (!tvApp.slideshow.started) {
                 tvApp.clearStage({showLoader: false});
 
                 PictureManager.stopLoading();
                 Page.header.display(true);
                 Page.message.set(e && e.detail && ( e.detail.msg || e.detail.desc ) || Constants.FAILED_TO_LOAD_MSG).display();
-            }
+            } else tvApp.slideshow.onSlideLoadError();
 
             /* Send messages to Sender app*/
             var desc = e.detail && e.detail.desc ? e.detail.desc : Constants.FAILED_TO_LOAD_MSG,
@@ -153,8 +156,8 @@ var mPlayerCallbacks = {
 
             if (
                 type =='AUDIO' &&
-                (!tvApp.slideshow.isTurnedOn ||
-                tvApp.slideshow.isCustom)
+                (!tvApp.slideshow.started ||
+                tvApp.slideshow.custom)
             ) Utils.ui.updatePlayerStyles();
 
             /* Send messages to Sender app*/
@@ -177,7 +180,7 @@ var mPlayerCallbacks = {
         }
 
         function onPause() {
-            if (tvApp.slideshow.isTurnedOn) return;
+            if (tvApp.slideshow.started) return;
             /* Send messages to Sender app*/
             var message = {
                 "event": "MEDIA_PLAYBACK",
@@ -329,10 +332,12 @@ var mPlayerCallbacks = {
                     //Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
                     break;
                 case 'VIDEO':
-                    if (!tvApp.slideshow.isTurnedOn) Page.thumbnail.display({flag: true, type: 'video', cache: true}); // display a thumbnail
+                    if (!tvApp.slideshow.started) Page.thumbnail.display({flag: true, type: 'video', cache: true}); // display a thumbnail
                     else Page.thumbnail.display({flag: true, type:'video', showOnlyThumb: true, cache: true});
                     break;
             }
+
+            if (tvApp.slideshow.started) tvApp.slideshow.onSlideMediaEnded();
 
             /* Send messages to Sender app*/
             var message = {

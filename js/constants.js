@@ -7,7 +7,9 @@ var Constants = (function(){
     return {
         APP_NAMESPACE: 		'urn:x-cast:com.verizon.smartview',
         APP_INFO: 			'v' + Config.app.version + ' ' + Config.app.tv_type + ' : ',
-        FAILED_TO_LOAD_MSG: 'Failed to load resource'
+        FAILED_TO_LOAD_MSG: 'Failed to load resource',
+        ANIMATION_DURATION: 2000,
+        SLIDE_DURATION: 3000
     }
 
 }());

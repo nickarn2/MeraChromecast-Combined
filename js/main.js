@@ -3,38 +3,6 @@
 var tvApp = {
 
     senderId: null,
-    slideshow: {
-        isTurnedOn: false,
-        isPaused: false,
-        isCustom: false,
-        slide: 1,
-        soundtrackUrl: null,
-        setSoundTrackUrl: function(media) {
-            if (media && media.url && media.type == 'AUDIO')  this.soundtrackUrl = media.url;
-            else this.soundtrackUrl = null;
-        },
-        getSoundTrackUrl: function() {
-            return this.soundtrackUrl;
-        },
-        isFirstSlide: function() {
-            return this.isTurnedOn && this.slide == 1;
-        },
-        turnOnSlideshow: function() {
-            this.isTurnedOn = true;
-        },
-        turnOffSlideshow: function() {
-            this.isTurnedOn = false;
-            this.isCustom =  false;
-            this.slide = 1;
-        },
-        turnOnCustomSlideshow: function() {
-            if (!this.isTurnedOn) return;
-            this.isCustom = true;
-        },
-        turnOffCustomSlideshow: function() {
-            this.isCustom = false;
-        }
-    },
     stateObj: {},
     eventBus: null,
     /**
@@ -72,6 +40,7 @@ var tvApp = {
         config.player = tvApp.playerEl;
         tvApp.player = new VisualMediaPlayer(config);
         tvApp.soundtrack = new Soundtrack({player: $("#soundtrack")});
+        tvApp.slideshow = Slideshow.getInstance();
 
         tvApp.registerFastCastEvents(); // registering of system events
     },
@@ -112,6 +81,11 @@ var tvApp = {
         //Utils.ui.updatePlayerCurtimeLabel();
         Page.header.display(true); // display a header with Verizon logo
     },
+    pause: function() {
+        if (!Utils.isEventValid()) return;
+        tvApp.player.pause();
+        Page.message.set('<span> PAUSED </span>').display();
+    },
     /**
      * Add listeners for FastCast module events
      * FastCast module catchs events from Sender app and dispatches JS CustomEvent
@@ -132,6 +106,11 @@ var tvApp = {
                 orientation = tvApp.stateObj.media.exif,
                 hasOrientation = orientation !== null && orientation !== undefined;
 
+            if (tvApp.slideshow.started) {
+                tvApp.slideshow.onSlideLoadStart({type: "PICTURE"});
+                if (tvApp.soundtrack.stopped) tvApp.soundtrack.load(tvApp.slideshow.getSoundTrackUrl());
+            }
+
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": url,
@@ -142,12 +121,10 @@ var tvApp = {
             console.log(Constants.APP_INFO, 'url', url);
             console.log(Constants.APP_INFO, 'orientation', orientation);
 
-            if (tvApp.slideshow.isTurnedOn && tvApp.soundtrack.stopped) tvApp.soundtrack.load(tvApp.slideshow.getSoundTrackUrl());
-
-            if (tvApp.slideshow.isFirstSlide()) {
+            if (tvApp.slideshow.isSlideNumber(1)) {
                 if (!prepareStage.prepared) prepareStage();
                 Page.loading.display(true);
-            } else if (!tvApp.slideshow.isTurnedOn || tvApp.slideshow.isCustom) {
+            } else if (!tvApp.slideshow.started || tvApp.slideshow.custom) {
                 if (tvApp.stateObj.media.thumbnail) {
                     Page.thumbnail.display({flag: true, type: 'picture', cb: function() {
                         console.log(Constants.APP_INFO, 'Stage is prepared', prepareStage.prepared);
@@ -160,7 +137,7 @@ var tvApp = {
                 }
             }
 
-            if (tvApp.slideshow.isTurnedOn && Animation.getType() == 'MOSAIC' && !Animation.mosaic.initialized) {
+            if (tvApp.slideshow.started && Animation.getType() == 'MOSAIC' && !Animation.mosaic.initialized) {
                 $.when(Animation.mosaic.init())
                 .done(function() {
                     console.log(Constants.APP_INFO, 'Animation mosaic: initialized');
@@ -180,7 +157,7 @@ var tvApp = {
              */
             function displayImage() {
                 console.log(Constants.APP_INFO, 'Load image: ', url);
-                if (tvApp.slideshow.isTurnedOn) tvApp.soundtrack.setCallback(null);
+                if (tvApp.slideshow.started) tvApp.soundtrack.setCallback(null);
 
                 PictureManager.stopLoading();
 
@@ -192,7 +169,7 @@ var tvApp = {
 
                 bPicture.load(url, function(){
                     console.log(Constants.APP_INFO, 'Load image success callback: ', url);
-                    if (tvApp.slideshow.isTurnedOn) {
+                    if (tvApp.slideshow.started) {
                         console.log(Constants.APP_INFO, 'tvApp.soundtrack.loaded', tvApp.soundtrack.loaded);
                         console.log(Constants.APP_INFO, 'tvApp.soundtrack.error', tvApp.soundtrack.error);
                         if (tvApp.soundtrack.loaded || tvApp.soundtrack.error || tvApp.soundtrack.stopped) onLoadImageSuccess();
@@ -203,8 +180,8 @@ var tvApp = {
                 function onLoadImageSuccess() {
                     console.log(Constants.APP_INFO, 'onLoadImageSuccess');
 
-                    if (tvApp.slideshow.isTurnedOn && tvApp.soundtrack.loaded) {
-                        if (!tvApp.slideshow.isPaused) tvApp.soundtrack.play();//TBD: check if it's already playing (not urgent task)
+                    if (tvApp.slideshow.started && tvApp.soundtrack.loaded) {
+                        if (!tvApp.slideshow.paused) tvApp.soundtrack.play();//TBD: check if it's already playing (not urgent task)
                     }
 
                     if (!prepareStage.prepared) prepareStage();
@@ -220,9 +197,9 @@ var tvApp = {
 
                     Animation.reset(bPicture.getContainer(), tPicture.getContainer());
 
-                    if (tvApp.slideshow.isTurnedOn &&
-                        tvApp.slideshow.slide !== 1 &&
-                        !tvApp.slideshow.isCustom &&
+                    if (tvApp.slideshow.started &&
+                        !tvApp.slideshow.isSlideNumber(1) &&
+                        !tvApp.slideshow.custom &&
                         Utils.ui.viewManager.getRecentViewInfo().mode == 'photo'
                     ) {
                         PictureManager.animate(bPicture, tPicture);
@@ -230,8 +207,7 @@ var tvApp = {
                         tPicture.hide();
                     }
 
-                    if (tvApp.slideshow.isTurnedOn) tvApp.slideshow.slide++;
-                    tvApp.slideshow.turnOffCustomSlideshow();
+                    if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadComplete();
 
                     var message = {
                         "event": "MEDIA_PLAYBACK",
@@ -251,12 +227,12 @@ var tvApp = {
                     console.log(Constants.APP_INFO, 'Load image error callback: ', url);
                     console.log(Constants.APP_INFO, 'Load image error: ', e);
 
-                    if (!tvApp.slideshow.isTurnedOn) {
+                    if (!tvApp.slideshow.started) {
                         // Hide whatever page is currently shown.
                         $('.page').removeClass('displayed');
                         Page.header.display(true);
                         Page.message.set(e && e.detail && e.detail.msg || Constants.FAILED_TO_LOAD_MSG).display();
-                    }
+                    } else tvApp.slideshow.onSlideLoadError();
 
                     // e.detail exists if image had to be loaded with auth params (secure)
                     var desc = e && e.detail && e.detail.desc ? e.detail.desc : Constants.FAILED_TO_LOAD_MSG,
@@ -297,15 +273,15 @@ var tvApp = {
             var url = tvApp.stateObj.media.url;
             console.debug(Constants.APP_INFO, "Received command to play url: " + url);
 
-            if (tvApp.slideshow.isTurnedOn) {
-                tvApp.soundtrack.stop();
+            if (tvApp.slideshow.started) {
+                tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
                 tvApp.soundtrack.setCallback(null);
             }
             if (
-                tvApp.slideshow.isTurnedOn &&
-                !tvApp.slideshow.isCustom &&
+                tvApp.slideshow.started &&
+                !tvApp.slideshow.custom &&
                 Utils.ui.viewManager.getRecentViewInfo().mode == 'video-player' &&
-                tvApp.slideshow.slide !== 1
+                !tvApp.slideshow.isSlideNumber(1)
             ) {
                 Page.thumbnail.display({flag: true, type:'video', showOnlyThumb: true, cache: true});
             }
@@ -313,10 +289,10 @@ var tvApp = {
             tvApp.player.stop();
             tvApp.player.play(url);
 
-            if (!tvApp.slideshow.isTurnedOn || tvApp.slideshow.isCustom) {
+            if (!tvApp.slideshow.started || tvApp.slideshow.custom) {
                 tvApp.clearStage({showLoader: false});
                 tvApp.showAudioPage();
-            } else if (tvApp.slideshow.isFirstSlide()) {
+            } else if (tvApp.slideshow.isSlideNumber(1)) {
                 tvApp.clearStage({showLoader: false});
                 Page.loading.display(true);
             }
@@ -334,20 +310,20 @@ var tvApp = {
             var url = tvApp.stateObj.media.url;
             console.debug(Constants.APP_INFO, "Received command to play url: " + url);
 
-            if (tvApp.slideshow.isTurnedOn) {
-                tvApp.soundtrack.stop();
+            if (tvApp.slideshow.started) {
+                tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
                 tvApp.soundtrack.setCallback(null);
             }
             if (
-                tvApp.slideshow.isTurnedOn &&
-                !tvApp.slideshow.isCustom &&
+                tvApp.slideshow.started &&
+                !tvApp.slideshow.custom &&
                 Utils.ui.viewManager.getRecentViewInfo().mode == 'video-player' &&
-                tvApp.slideshow.slide !== 1
+                !tvApp.slideshow.isSlideNumber(1)
             ) {
                 Page.thumbnail.display({flag: true, type: 'video', showOnlyThumb: true, cache: true});
             }
 
-            if (!tvApp.slideshow.isTurnedOn) {
+            if (!tvApp.slideshow.started) {
                 Page.thumbnail.display({flag: true, type: 'video', cb: function() {
                     tvApp.player.stop();
                     tvApp.clearStage({showLoader: false});
@@ -355,13 +331,13 @@ var tvApp = {
                 }});
             } else {
                 tvApp.stateObj.loadStarted = true;
-                if (tvApp.slideshow.isFirstSlide()) {
+                if (tvApp.slideshow.isSlideNumber(1)) {
                     tvApp.clearStage({showLoader: false});
                     Page.loading.display(true);
                     Page.thumbnail.display({flag: true, type:'video', loadThumb: true});
                     tvApp.player.stop();
                     tvApp.player.play(tvApp.stateObj.media.url);
-                } else if (tvApp.slideshow.isCustom) {
+                } else if (tvApp.slideshow.custom) {
                     Page.thumbnail.display({flag: true, type: 'video', withSpinner: true, cb: function() {
                         tvApp.clearStage({showLoader: false});
                         tvApp.videoThumbnail.addClass('displayed');
@@ -381,8 +357,8 @@ var tvApp = {
          */
         this.eventBus.addEventListener('pause', function(e) {
             console.log(Constants.APP_INFO, 'pause', e);
-            if (tvApp.slideshow.isTurnedOn) pauseSlideshow();
-            else pause();
+            if (tvApp.slideshow.started) tvApp.slideshow.pause();
+            else tvApp.pause();
         });
         /*
          * Event resume
@@ -394,10 +370,7 @@ var tvApp = {
             var media = tvApp.stateObj.media;
             if (!media) return;
 
-            if(tvApp.slideshow.isTurnedOn) {
-                tvApp.slideshow.isPaused = false;
-                if (Utils.ui.viewManager.getRecentViewInfo().mode == 'photo' && tvApp.soundtrack.loaded) tvApp.soundtrack.resume();
-            }
+            if (tvApp.slideshow.started) tvApp.slideshow.resume();
 
             if (!tvApp.stateObj.loadStarted && media.type == 'VIDEO') {
                 tvApp.stateObj.loadStarted = true;
@@ -422,14 +395,7 @@ var tvApp = {
          */
         this.eventBus.addEventListener('start_slideshow', function(e) {
             console.log(Constants.APP_INFO, 'start_slideshow', e);
-            tvApp.slideshow.turnOnSlideshow();
-            if (e.detail && e.detail.media) tvApp.slideshow.setSoundTrackUrl(e.detail.media);
-            tvApp.soundtrack.load(tvApp.slideshow.getSoundTrackUrl());
-
-            Animation.config({
-                type: e && e.detail && e.detail.type,
-                duration: e && e.detail && e.detail.value
-            });
+            tvApp.slideshow.start(e && e.detail);
 
             var message = {
                 "event": "MEDIA_PLAYBACK",
@@ -442,9 +408,7 @@ var tvApp = {
          */
         this.eventBus.addEventListener('stop_slideshow', function() {
             console.log(Constants.APP_INFO, 'stop_slideshow');
-            tvApp.slideshow.turnOffSlideshow();
-            tvApp.soundtrack.stop();
-            tvApp.slideshow.setSoundTrackUrl(null);
+            tvApp.slideshow.stop();
 
             var message = {
                 "event": "MEDIA_PLAYBACK",
@@ -457,14 +421,14 @@ var tvApp = {
          */
         this.eventBus.addEventListener('next_slide', function(e) {
             console.log(Constants.APP_INFO, 'next_slide');
-            tvApp.slideshow.turnOnCustomSlideshow();
+            tvApp.slideshow.next();
         });
         /*
          * Event previous_slideshow
          */
         this.eventBus.addEventListener('previous_slide', function(e) {
             console.log(Constants.APP_INFO, 'previous_slide');
-            tvApp.slideshow.turnOnCustomSlideshow();
+            tvApp.slideshow.previous();
         });
         /*
          * Event stop_media
@@ -507,26 +471,3 @@ window.onload = function() {
         FastCast.connect();
     });
 };
-
-function pause() {
-    if (!Utils.isEventValid()) return;
-    tvApp.player.pause();
-    Page.message.set('<span> PAUSED </span>').display();
-}
-
-function pauseSlideshow() {
-    console.log(Constants.APP_INFO, 'pauseSlideshow');
-    tvApp.slideshow.isPaused = true;
-    if (Utils.ui.viewManager.getRecentViewInfo().mode == 'photo') tvApp.soundtrack.pause();
-
-    Page.message.set('<span> PAUSED </span>').display();
-    pause();
-
-    var message = {
-        "event": "MEDIA_PLAYBACK",
-        "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-        "media_event": { "event" : "pause" }
-    };
-    Utils.sendMessageToSender(message);
-}
-
