@@ -106,10 +106,7 @@ var tvApp = {
                 orientation = tvApp.stateObj.media.exif,
                 hasOrientation = orientation !== null && orientation !== undefined;
 
-            if (tvApp.slideshow.started) {
-                tvApp.slideshow.onSlideLoadStart({type: "PICTURE"});
-                if (tvApp.soundtrack.stopped) tvApp.soundtrack.load(tvApp.slideshow.getSoundTrackUrl());
-            }
+            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadStart({type: "PICTURE"});
 
             var message = {
                 "event": "MEDIA_PLAYBACK",
@@ -157,7 +154,6 @@ var tvApp = {
              */
             function displayImage() {
                 console.log(Constants.APP_INFO, 'Load image: ', url);
-                if (tvApp.slideshow.started) tvApp.soundtrack.setCallback(null);
 
                 PictureManager.stopLoading();
 
@@ -167,22 +163,10 @@ var tvApp = {
                     return;
                 }
 
-                bPicture.load(url, function(){
-                    console.log(Constants.APP_INFO, 'Load image success callback: ', url);
-                    if (tvApp.slideshow.started) {
-                        console.log(Constants.APP_INFO, 'tvApp.soundtrack.loaded', tvApp.soundtrack.loaded);
-                        console.log(Constants.APP_INFO, 'tvApp.soundtrack.error', tvApp.soundtrack.error);
-                        if (tvApp.soundtrack.loaded || tvApp.soundtrack.error || tvApp.soundtrack.stopped) onLoadImageSuccess();
-                        else tvApp.soundtrack.setCallback(onLoadImageSuccess);
-                    } else onLoadImageSuccess();
-                }, onLoadImageError);
+                bPicture.load(url, onLoadImageSuccess, onLoadImageError);
 
                 function onLoadImageSuccess() {
                     console.log(Constants.APP_INFO, 'onLoadImageSuccess');
-
-                    if (tvApp.slideshow.started && tvApp.soundtrack.loaded) {
-                        if (!tvApp.slideshow.paused) tvApp.soundtrack.play();//TBD: check if it's already playing (not urgent task)
-                    }
 
                     if (!prepareStage.prepared) prepareStage();
                     Utils.ui.viewManager.setView('photo');
@@ -224,35 +208,31 @@ var tvApp = {
                  * @param {undefined} Result: displaying an error.
                  */
                 function onLoadImageError(e) {
+                    var error = new MediaError();
                     console.log(Constants.APP_INFO, 'Load image error callback: ', url);
                     console.log(Constants.APP_INFO, 'Load image error: ', e);
+                    console.log(Constants.APP_INFO, 'Load image: MediaError: ', error);
 
                     if (!tvApp.slideshow.started) {
                         // Hide whatever page is currently shown.
                         $('.page').removeClass('displayed');
                         Page.header.display(true);
-                        Page.message.set(e && e.detail && e.detail.msg || Constants.FAILED_TO_LOAD_MSG).display();
+                        Page.message.set(error.description).display()
                     } else tvApp.slideshow.onSlideLoadError();
 
-                    // e.detail exists if image had to be loaded with auth params (secure)
-                    var desc = e && e.detail && e.detail.desc ? e.detail.desc : Constants.FAILED_TO_LOAD_MSG,
-                        code = e && e.detail && e.detail.code ? e.detail.code : 0;
-
+                    /* Send messages to Sender app*/
                     var message_1 = {
                         "event": "ERROR",
                         "media": { "url": url },
-                        "error": {
-                            "code": code,
-                            "description": desc,
-                        }
+                        "error": error
                     };
                     var message_2 = {
                         "event": "MEDIA_PLAYBACK",
                         "message": url,
                         "media_event": {
                             "event": "error",
-                            "code": code,
-                            "description": desc
+                            "code": error.code,
+                            "description": error.description
                         }
                     };
                     Utils.sendMessageToSender(message_1);
@@ -273,10 +253,7 @@ var tvApp = {
             var url = tvApp.stateObj.media.url;
             console.debug(Constants.APP_INFO, "Received command to play url: " + url);
 
-            if (tvApp.slideshow.started) {
-                tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
-                tvApp.soundtrack.setCallback(null);
-            }
+            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
             if (
                 tvApp.slideshow.started &&
                 !tvApp.slideshow.custom &&
@@ -310,10 +287,7 @@ var tvApp = {
             var url = tvApp.stateObj.media.url;
             console.debug(Constants.APP_INFO, "Received command to play url: " + url);
 
-            if (tvApp.slideshow.started) {
-                tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
-                tvApp.soundtrack.setCallback(null);
-            }
+            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
             if (
                 tvApp.slideshow.started &&
                 !tvApp.slideshow.custom &&

@@ -1,7 +1,7 @@
 var mPlayerCallbacks = {
 
     registerHTML5Callbacks: function() {
-        var TAG = "HTML5_VIDEO_TAG";
+        var TAG = "mPlayerCallbacks";
         console.log(Constants.APP_INFO, 'registerHTML5Callbacks');
 
         document.addEventListener('mp_abort', onAbort, false);
@@ -44,7 +44,6 @@ var mPlayerCallbacks = {
             switch (media.type) {
                 case "VIDEO":
                     if (tvApp.slideshow.started) {
-                        tvApp.soundtrack.stop();
                         tvApp.clearStage({showLoader: false, showCastMsg: true});
                         Page.picture.display({flag: false, elem: $('#pictures')});
 
@@ -56,7 +55,6 @@ var mPlayerCallbacks = {
                     break;
                 case "AUDIO":
                     if (tvApp.slideshow.started) {
-                        tvApp.soundtrack.stop();
                         if (!tvApp.slideshow.custom) {
                             tvApp.clearStage({showLoader: false, showCastMsg: true});
                             tvApp.showAudioPage();
@@ -108,31 +106,29 @@ var mPlayerCallbacks = {
 
         function onErrorPlaying(e) {
             console.log(Constants.APP_INFO, TAG, 'onErrorPlaying: ', e);
+            var error = e && e.detail && e.detail.error;
 
             if (!tvApp.slideshow.started) {
                 tvApp.clearStage({showLoader: false});
 
                 PictureManager.stopLoading();
                 Page.header.display(true);
-                Page.message.set(e && e.detail && ( e.detail.msg || e.detail.desc ) || Constants.FAILED_TO_LOAD_MSG).display();
+                Page.message.set((error && error.description) || Constants.FAILED_TO_LOAD_MSG).display();
             } else tvApp.slideshow.onSlideLoadError();
 
             /* Send messages to Sender app*/
-            var desc = e.detail && e.detail.desc ? e.detail.desc : Constants.FAILED_TO_LOAD_MSG,
-                code = e.detail && e.detail.code ? e.detail.code : 0;
-
             var message_1 = {
                 "event": "ERROR",
                 "media": {"url": e.detail.url},
-                "error": {"description": desc, "code": code}
+                "error": error
             };
             var message_2 = {
                 "event": "MEDIA_PLAYBACK",
                 "message": e.detail.url,
                 "media_event": {
                     "event": "error",
-                    "code": code,
-                    "description": desc
+                    "code": error && error.code,
+                    "description": error && error.description
                 }
             };
 

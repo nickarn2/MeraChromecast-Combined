@@ -21,7 +21,6 @@ var Slideshow = (function () {
             instance.started = true;
 
             if (config && config.media) tvApp.slideshow.setSoundTrackUrl(config.media);
-            tvApp.soundtrack.load(tvApp.slideshow.getSoundTrackUrl());
 
             Animation.config({
                 type: config && config.type,
@@ -55,10 +54,11 @@ var Slideshow = (function () {
             clearTimeoutSlideshow();
 
             var message = {
+                "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                 "media_event": { "event" : "pause" }
             };
-            Utils.sendMessageToSender("MEDIA_PLAYBACK", message);
+            Utils.sendMessageToSender(message);
         },
         resume: function() {
             instance.paused = false;
@@ -81,6 +81,12 @@ var Slideshow = (function () {
                 type: slideInfo && slideInfo.type,
                 status: 'loadstart'
             }
+            if (slideState.type == 'PICTURE') {
+                if (!tvApp.soundtrack.url) {
+                    var url = tvApp.slideshow.getSoundTrackUrl();
+                    tvApp.soundtrack.load(url);
+                }
+            }
         },
         onSlideLoadComplete: function() {
             instance.slide++;
@@ -88,6 +94,7 @@ var Slideshow = (function () {
 
             slideState.status = 'loadcomplete';
             if (slideState.type == 'PICTURE') stopSlideshowByTimeout(pictureSlideTimeout);
+            else tvApp.soundtrack.stop();
         },
         onSlideLoadError: function() {
             slideState.status = 'error';

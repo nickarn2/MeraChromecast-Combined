@@ -10,21 +10,14 @@
 function Soundtrack(config) {
     MediaPlayer.apply(this, arguments);//Inherit MediaPlayer
 
-    var self = this,
-        callback = null,
-        timeoutFn = null,
-        timeout = 5000;
-    self._className = 'Soundtrack';
+    var self = this;
 
+    self._className = 'Soundtrack';
     self.url = null;
     self.loaded = false;
     self.error = false;
     self.stopped = false;
     self.lastCurrentTime = 0;
-    self.setCallback = function(cb) {
-        self._log('setCallback', typeof cb);
-        callback = cb;
-    }
 
     /**
      * Start media playback.
@@ -33,24 +26,19 @@ function Soundtrack(config) {
      * @return {undefined} Result: starting media playback.
      */
     var parentPlay = self.play;
-    self.load = function(url, onSuccess, onError) {
+    self.load = function(url) {
         self.url = url;
         if (!url) {
             self.error = true;
             return;
         }
         parentPlay(url);
+
         self._log('load:' + url);
         self.loaded = false;
         self.error = false;
         self.stopped = false;
-        self.registerEvents();
-
-        timeoutFn = setTimeout(function() {
-            self._log('request timed out => stop loading');
-            self.stop();
-            callback && callback();
-        }, 5000);
+        registerEvents();
     }
 
     self.play = function() {
@@ -69,14 +57,15 @@ function Soundtrack(config) {
     self.stop = function() {
         if (self._player.currentTime > 0) self.lastCurrentTime = self._player.currentTime;
         parentStop();
-        clearTimeout(timeoutFn);
-        self.unregisterEvents();
+
+        unregisterEvents();
+        self.url = null;
         self.loaded = false;
         self.error = false;
         self.stopped = true;
     }
 
-    self.registerEvents = function() {
+    function registerEvents() {
         self._log('registerEvents');
 
         self._player.addEventListener('abort', onAbort, false);
@@ -101,7 +90,7 @@ function Soundtrack(config) {
         self._player.addEventListener('ended', onEnded, false);
         self._player.addEventListener('error', onError, false);
     };
-    self.unregisterEvents = function() {
+    function unregisterEvents() {
         self._log('unregisterEvents');
 
         self._player.removeEventListener('abort', onAbort, false);
@@ -134,8 +123,7 @@ function Soundtrack(config) {
     function onCanplay() {
         self._log('event: canplay');
         self.loaded = true;
-        clearTimeout(timeoutFn);
-        callback && callback();
+        if (!tvApp.slideshow.paused) self.play();
     }
 
     function onCanplayThrough() {
@@ -216,15 +204,22 @@ function Soundtrack(config) {
     }
 
     function onError(e) {
-        var code = self._player.error && self._player.error.code ? self._player.error.code : 0,
-            desc = self._ERROR_CODES[code] || false;
-
-        self._log('Load error: ' + self._player.src);
-        self._log('Load error desc: ' + desc);
-        self._log('Load error code: ' + code);
+        var code = self._player.error && self._player.error.code,
+            error = new SoundtrackMediaError(code);
 
         self.error = true;
-        clearTimeout(timeoutFn);
-        callback && callback();
+
+        self._log('Load error: ', self.url);
+        self._log('Load error: internal code: ', code);
+        self._log('Load error: SoundtrackMediaError', error);
+
+        /* Send messages to Sender app*/
+        var message = {
+            "event": "ERROR",
+            "media": {"url": self.url},
+            "error": error
+        };
+
+        Utils.sendMessageToSender(message);
     }
 }

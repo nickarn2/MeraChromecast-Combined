@@ -223,14 +223,14 @@ function VisualMediaPlayer(config) {
     }
 
     function onError(e) {
-        var code = self._player.error && self._player.error.code ? self._player.error.code : 0,
-            desc = self._ERROR_CODES[code] || false;
+        var code = self._player.error && self._player.error.code,
+            error = new MediaError(code);
 
         self._log('Load error: ' + self._player.src);
-        self._log('Load error desc: ' + desc);
-        self._log('Load error code: ' + code);
+        self._log('Load error: internal code: ' + code);
+        self._log('Load error: MediaError', error);
 
-        var onErrorPlayingEvent = new CustomEvent('mp_error', {detail: {url: self._player.src, code: code, desc: desc}});
+        var onErrorPlayingEvent = new CustomEvent('mp_error', {detail: {url: self._player.src, error: error}});
         document.dispatchEvent(onErrorPlayingEvent);
     }
 }

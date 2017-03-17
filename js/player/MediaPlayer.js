@@ -12,19 +12,12 @@ function MediaPlayer(config) {
 
     self._className = 'MediaPlayer';
     self._appInfo = "v" + Config.app.version + " " + Config.app.tv_type + " : ";
-
-    self._ERROR_CODES = {
-        1: "Fetching process aborted by user",//MEDIA_ERR_ABORTED
-        2: "Error occurred when downloading",//MEDIA_ERR_NETWORK
-        3: "Error occurred when decoding",//MEDIA_ERR_DECODE
-        4: "There was an issue casting your content. Please try again."//MEDIA_ERR_SRC_NOT_SUPPORTED
-    };
-
     self._log = function() {
         var info = '';
         if (arguments.length) {
             for (var i=0; i < arguments.length; i++) {
-                info += ' ' + arguments[i];
+                if (typeof arguments[i] == 'object') info += ' ' + JSON.stringify(arguments[i]);
+                else info += ' ' + arguments[i];
             }
         }
         console.log(self._appInfo, self._className, 'Id: ' + self._player.id, info);
