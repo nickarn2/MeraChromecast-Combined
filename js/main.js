@@ -287,42 +287,57 @@ var tvApp = {
             var url = tvApp.stateObj.media.url;
             console.debug(Constants.APP_INFO, "Received command to play url: " + url);
 
-            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
-            if (
-                tvApp.slideshow.started &&
-                !tvApp.slideshow.custom &&
-                Utils.ui.viewManager.getRecentViewInfo().mode == 'video-player' &&
-                !tvApp.slideshow.isSlideNumber(1)
-            ) {
-                Page.thumbnail.display({flag: true, type: 'video', showOnlyThumb: true, cache: true});
-            }
-
-            if (!tvApp.slideshow.started) {
-                Page.thumbnail.display({flag: true, type: 'video', cb: function() {
-                    tvApp.player.stop();
-                    tvApp.clearStage({showLoader: false});
-                    tvApp.videoThumbnail.addClass('displayed');
-                }});
-            } else {
-                tvApp.stateObj.loadStarted = true;
+            /*
+             * SLIDESHOW
+             ********************************************************************************/
+            if (tvApp.slideshow.started) {
+                tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
+                /*
+                 * FIRST SLIDE
+                 * 1) Show loading page
+                 * 2) Load thumbnail but don't show
+                 * 3) Stop player
+                 * 4) Trigger "resume" event
+                 */
                 if (tvApp.slideshow.isSlideNumber(1)) {
                     tvApp.clearStage({showLoader: false});
                     Page.loading.display(true);
                     Page.thumbnail.display({flag: true, type:'video', loadThumb: true});
                     tvApp.player.stop();
-                    tvApp.player.play(tvApp.stateObj.media.url);
+                    setTimeout(function() { Utils.triggerEvent("resume"); }, 1000);
+                /*
+                 * NEXT_SLIDE || PREVIOUS_SLIDE
+                 * 1) Load and show thumbnail with a spinner
+                 * 2) Stop player
+                 * 3) Trigger "resume" event
+                 */
                 } else if (tvApp.slideshow.custom) {
                     Page.thumbnail.display({flag: true, type: 'video', withSpinner: true, cb: function() {
                         tvApp.clearStage({showLoader: false});
                         tvApp.videoThumbnail.addClass('displayed');
                         tvApp.player.stop();
-                        tvApp.player.play(url);
+                        setTimeout(function() { Utils.triggerEvent("resume"); }, 1000);
                     }});
+                /*
+                 * AUTO SLIDE
+                 * 1) Load thumbnail but don't show
+                 * 2) Stop player
+                 * 3) Trigger "resume" event
+                 */
                 } else {
                     Page.thumbnail.display({flag: true, type:'video', loadThumb: true});
                     tvApp.player.stop();
-                    tvApp.player.play(url);
+                    setTimeout(function() { Utils.triggerEvent("resume"); }, 1000);
                 }
+            /*
+             * NO SLIDESHOW
+             ********************************************************************************/
+            } else {
+                Page.thumbnail.display({flag: true, type: 'video', cb: function() {
+                    tvApp.player.stop();
+                    tvApp.clearStage({showLoader: false});
+                    tvApp.videoThumbnail.addClass('displayed');
+                }});
             }
         });
         /*
@@ -344,12 +359,10 @@ var tvApp = {
             var media = tvApp.stateObj.media;
             if (!media) return;
 
-            if (tvApp.slideshow.started) tvApp.slideshow.resume();
-
             if (!tvApp.stateObj.loadStarted && media.type == 'VIDEO') {
                 tvApp.stateObj.loadStarted = true;
 
-                Page.thumbnail.display({showLoading: true});
+                if (!tvApp.slideshow.started) Page.thumbnail.display({showLoading: true});
                 tvApp.player.play(media.url); // start media playback
             } else {
                 var message = {
@@ -361,6 +374,7 @@ var tvApp = {
                 Page.message.set('');
 
                 if (!Utils.isEventValid()) return;
+                if (tvApp.slideshow.started) tvApp.slideshow.resume();
                 tvApp.player.resume();
             }
         });

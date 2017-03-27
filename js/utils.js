@@ -281,6 +281,18 @@ var Utils = (function(){
         }
     }
 
+    /**
+     * Create custom event and dispatch
+     * @param {String} event Event name
+     * @param {Object} message Event message {detail: <value>}
+     */
+    function triggerEvent(event, message) {
+        if (typeof event !== 'string') return;
+
+        var customEvent = new CustomEvent(event, {detail: message});
+        document.dispatchEvent(customEvent);
+    }
+
     return {
         ui: {
             /**
@@ -365,7 +377,12 @@ var Utils = (function(){
 
             console.log(Constants.APP_INFO, TAG, 'isEventValid', COMMAND_IS_VALID);
             return COMMAND_IS_VALID;
-        }
+        },
+
+        /**
+         * Create custom event and dispatch
+         */
+        triggerEvent: triggerEvent
     }
 
 }());
