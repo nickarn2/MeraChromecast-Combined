@@ -98,8 +98,7 @@ var FastCast = (function(){
                         console.log(Constants.APP_INFO, type);
 
                         type = type && typeof type == 'string' && type.toLowerCase();
-                        var customEvent = new CustomEvent("load_start_"+type, {detail: parsed });
-                        document.dispatchEvent(customEvent);
+                        Utils.triggerEvent("load_start_"+type, parsed);
                         break;
 
                     case 'RESUME':
@@ -110,8 +109,7 @@ var FastCast = (function(){
                     case 'NEXT_SLIDE':
                     case 'PREVIOUS_SLIDE':
                         event = event.toLowerCase();
-                        var customEvent = new CustomEvent(event, {detail: parsed });
-                        document.dispatchEvent(customEvent);
+                        Utils.triggerEvent(event, parsed);
                         break;
                 }
             } catch (event) {

@@ -9,6 +9,31 @@ var Page = (function(){
     var TAG = "Page";
 
     /**
+     * Reset a screen state by default.
+     *
+     * @param {object} options Options.
+     * @return {undefined} Result: reset a screen state by default (hide messages, reset a media player state, show a empty picture container, hide a headband, show/hide a loading).
+     */
+    function clearStage(options) {
+        console.log(Constants.APP_INFO, 'clearStage: options: ', options);
+        $('.page').removeClass('displayed');
+
+        if (!options || !options.showCastMsg) Page.message.set('');
+        else if (options.showCastMsg) Page.message.display();
+
+        tvApp.playerContainer.removeAttr("poster");
+        tvApp.playerContainer.find(".artwork").css("background-image", "");
+        tvApp.playerContainer.find(".artwork .loader").removeClass("displayed");
+        tvApp.playerContainer.find(".info .title").empty();
+        tvApp.playerContainer.find(".info .desc").empty();
+        tvApp.playerContainer.find(".controls").css("display", "none");
+        tvApp.playerContainer.find(".controls .durtime").empty().html("0:00");
+        tvApp.playerContainer.find(".controls .curtime").empty().html("0:00");
+
+        if (!options || options.showLoader) Page.loading.display(true); // display a loading screen
+    }
+
+    /**
      * Display a header with Verizon logo.
      * @param {boolean} flag Show/hide header?
      * @return {undefined} Result: displaying a header.
@@ -216,7 +241,25 @@ var Page = (function(){
         else elem.removeClass(disp);
     }
 
+    /**
+     * Display music player page.
+     */
+    function displayMusicPlayer() {
+        console.log(Constants.APP_INFO, 'Show audio page');
+        tvApp.stateObj.loadStarted = true;
+
+        PictureManager.stopLoading();
+        Utils.ui.viewManager.setView('audio-player');
+
+        //checking if thumbnail is present is inside the following function
+        Utils.ui.setArtwork(tvApp.playerContainer.find(".artwork"), tvApp.stateObj.media.thumbnail);
+        Utils.ui.setMediaInfo(tvApp.playerContainer.find(".info"), tvApp.stateObj);
+        //Utils.ui.updatePlayerCurtimeLabel();
+        Page.header.display(true); // display a header with Verizon logo
+    }
+
     return {
+        clearStage: clearStage,
         header: {
             display: displayHeader
         },
@@ -238,6 +281,9 @@ var Page = (function(){
         },
         picture: {
             display: displayPicture
+        },
+        musicPlayer: {
+            display: displayMusicPlayer
         }
     }
 

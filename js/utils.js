@@ -276,6 +276,10 @@ var Utils = (function(){
             if (!window.messageBus || !tvApp.senderId || !dataObj) return;
             var data = JSON.stringify(dataObj);
             window.messageBus.send(tvApp.senderId, data);
+
+            if (dataObj.media_event && dataObj.media_event.event) {
+                triggerEvent("onMediaEvent", {event: dataObj.media_event.event});
+            }
         } catch(e) {
             console.error(Constants.APP_INFO, TAG, e);
         }

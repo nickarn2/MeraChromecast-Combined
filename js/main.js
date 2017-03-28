@@ -44,43 +44,6 @@ var tvApp = {
 
         tvApp.registerFastCastEvents(); // registering of system events
     },
-    /**
-     * Reset a screen state by default.
-     *
-     * @param {object} options Options.
-     * @return {undefined} Result: reset a screen state by default (hide messages, reset a media player state, show a empty picture container, hide a headband, show/hide a loading).
-     */
-    clearStage: function(options) {
-        console.log(Constants.APP_INFO, 'clearStage: options: ', options);
-        $('.page').removeClass('displayed');
-
-        if (!options || !options.showCastMsg) Page.message.set('');
-        else if (options.showCastMsg) Page.message.display();
-
-        tvApp.playerContainer.removeAttr("poster");
-        tvApp.playerContainer.find(".artwork").css("background-image", "");
-        tvApp.playerContainer.find(".artwork .loader").removeClass("displayed");
-        tvApp.playerContainer.find(".info .title").empty();
-        tvApp.playerContainer.find(".info .desc").empty();
-        tvApp.playerContainer.find(".controls").css("display", "none");
-        tvApp.playerContainer.find(".controls .durtime").empty().html("0:00");
-        tvApp.playerContainer.find(".controls .curtime").empty().html("0:00");
-
-        if (!options || options.showLoader) Page.loading.display(true); // display a loading screen
-    },
-    showAudioPage: function() {
-        console.log(Constants.APP_INFO, 'Show audio page');
-        tvApp.stateObj.loadStarted = true;
-
-        PictureManager.stopLoading();
-        Utils.ui.viewManager.setView('audio-player');
-
-        //checking if thumbnail is present is inside the following function
-        Utils.ui.setArtwork(tvApp.playerContainer.find(".artwork"), tvApp.stateObj.media.thumbnail);
-        Utils.ui.setMediaInfo(tvApp.playerContainer.find(".info"), tvApp.stateObj);
-        //Utils.ui.updatePlayerCurtimeLabel();
-        Page.header.display(true); // display a header with Verizon logo
-    },
     pause: function() {
         if (!Utils.isEventValid()) return;
         tvApp.player.pause();
@@ -111,14 +74,14 @@ var tvApp = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": url,
-                "media_event": {"event" : "loadstart"}
+                "media_event": {"event" : Constants.MediaEvent.MEDIA_LOAD_START}
             };
             Utils.sendMessageToSender(message);
 
             console.log(Constants.APP_INFO, 'url', url);
             console.log(Constants.APP_INFO, 'orientation', orientation);
 
-            if (tvApp.slideshow.isSlideNumber(1)) {
+            if (tvApp.slideshow.isLoadingPageRequired()) {
                 if (!prepareStage.prepared) prepareStage();
                 Page.loading.display(true);
             } else if (!tvApp.slideshow.started || tvApp.slideshow.custom) {
@@ -144,7 +107,7 @@ var tvApp = {
 
             function prepareStage() {
                 prepareStage.prepared = true;
-                tvApp.clearStage({showLoader: false});
+                Page.clearStage({showLoader: false});
                 tvApp.player.stop();
             }
             prepareStage.prepared = false;
@@ -182,7 +145,7 @@ var tvApp = {
                     Animation.reset(bPicture.getContainer(), tPicture.getContainer());
 
                     if (tvApp.slideshow.started &&
-                        !tvApp.slideshow.isSlideNumber(1) &&
+                        !tvApp.slideshow.isLoadingPageRequired() &&
                         !tvApp.slideshow.custom &&
                         Utils.ui.viewManager.getRecentViewInfo().mode == 'photo'
                     ) {
@@ -196,7 +159,7 @@ var tvApp = {
                     var message = {
                         "event": "MEDIA_PLAYBACK",
                         "message": url,
-                        "media_event": {"event": "loadcomplete"}
+                        "media_event": {"event": Constants.MediaEvent.MEDIA_LOAD_COMPLETE}
                     };
                     Utils.sendMessageToSender(message);
                 }
@@ -230,7 +193,7 @@ var tvApp = {
                         "event": "MEDIA_PLAYBACK",
                         "message": url,
                         "media_event": {
-                            "event": "error",
+                            "event": Constants.MediaEvent.MEDIA_ERROR,
                             "code": error.code,
                             "description": error.description
                         }
@@ -253,26 +216,48 @@ var tvApp = {
             var url = tvApp.stateObj.media.url;
             console.debug(Constants.APP_INFO, "Received command to play url: " + url);
 
-            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
-            if (
-                tvApp.slideshow.started &&
-                !tvApp.slideshow.custom &&
-                Utils.ui.viewManager.getRecentViewInfo().mode == 'video-player' &&
-                !tvApp.slideshow.isSlideNumber(1)
-            ) {
-                Page.thumbnail.display({flag: true, type:'video', showOnlyThumb: true, cache: true});
+            /*
+             * SLIDESHOW
+             ********************************************************************************/
+            if (tvApp.slideshow.started) {
+                tvApp.slideshow.onSlideLoadStart({type: "MEDIA"});
+
+                /*
+                 * FIRST SLIDE
+                 * Show loading page
+                 */
+                if (tvApp.slideshow.isLoadingPageRequired()) {
+                    Page.clearStage({showLoader: false});
+                    Page.loading.display(true);
+                /*
+                 * NEXT_SLIDE || PREVIOUS_SLIDE
+                 * Show audio page with spinner above thumbnail
+                 */
+                } else if (tvApp.slideshow.custom) {
+                    Page.clearStage({showLoader: false});
+                    Page.musicPlayer.display();
+                /*
+                 * AUTO SLIDE
+                 */
+                } else {
+                    //Audio page will be shown on canplay event
+                }
+            /*
+             * NO SLIDESHOW
+             ********************************************************************************/
+            } else {
+                Page.clearStage({showLoader: false});
+                Page.musicPlayer.display();
             }
 
+            /*
+             * Start fix VZMERA-148 (Video/audio freeze)
+             * Root cause: Media cannot be playing automatically if video tag is not displayed before setting src
+             */
+            tvApp.playerContainer.addClass("displayed");
+            /* End fix */
             tvApp.player.stop();
             tvApp.player.play(url);
-
-            if (!tvApp.slideshow.started || tvApp.slideshow.custom) {
-                tvApp.clearStage({showLoader: false});
-                tvApp.showAudioPage();
-            } else if (tvApp.slideshow.isSlideNumber(1)) {
-                tvApp.clearStage({showLoader: false});
-                Page.loading.display(true);
-            }
         });
         /*
          * Event load_start_video
@@ -299,12 +284,12 @@ var tvApp = {
                  * 3) Stop player
                  * 4) Trigger "resume" event
                  */
-                if (tvApp.slideshow.isSlideNumber(1)) {
-                    tvApp.clearStage({showLoader: false});
+                if (tvApp.slideshow.isLoadingPageRequired()) {
+                    Page.clearStage({showLoader: false});
                     Page.loading.display(true);
                     Page.thumbnail.display({flag: true, type:'video', loadThumb: true});
                     tvApp.player.stop();
-                    setTimeout(function() { Utils.triggerEvent("resume"); }, 1000);
+                    Utils.triggerEvent("resume");
                 /*
                  * NEXT_SLIDE || PREVIOUS_SLIDE
                  * 1) Load and show thumbnail with a spinner
@@ -313,10 +298,10 @@ var tvApp = {
                  */
                 } else if (tvApp.slideshow.custom) {
                     Page.thumbnail.display({flag: true, type: 'video', withSpinner: true, cb: function() {
-                        tvApp.clearStage({showLoader: false});
+                        Page.clearStage({showLoader: false});
                         tvApp.videoThumbnail.addClass('displayed');
                         tvApp.player.stop();
-                        setTimeout(function() { Utils.triggerEvent("resume"); }, 1000);
+                        Utils.triggerEvent("resume");
                     }});
                 /*
                  * AUTO SLIDE
@@ -327,7 +312,7 @@ var tvApp = {
                 } else {
                     Page.thumbnail.display({flag: true, type:'video', loadThumb: true});
                     tvApp.player.stop();
-                    setTimeout(function() { Utils.triggerEvent("resume"); }, 1000);
+                    Utils.triggerEvent("resume");
                 }
             /*
              * NO SLIDESHOW
@@ -335,7 +320,7 @@ var tvApp = {
             } else {
                 Page.thumbnail.display({flag: true, type: 'video', cb: function() {
                     tvApp.player.stop();
-                    tvApp.clearStage({showLoader: false});
+                    Page.clearStage({showLoader: false});
                     tvApp.videoThumbnail.addClass('displayed');
                 }});
             }
@@ -363,12 +348,19 @@ var tvApp = {
                 tvApp.stateObj.loadStarted = true;
 
                 if (!tvApp.slideshow.started) Page.thumbnail.display({showLoading: true});
+
+                /*
+                 * Start fix VZMERA-148 (Video/audio freeze)
+                 * Root cause: Media cannot be playing automatically if video tag is not displayed before setting src
+                 */
+                tvApp.playerContainer.addClass("displayed");
+                /* End fix */
                 tvApp.player.play(media.url); // start media playback
             } else {
                 var message = {
                     "event": "MEDIA_PLAYBACK",
                     "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                    "media_event": { "event" : "resume" }
+                    "media_event": { "event" : Constants.MediaEvent.MEDIA_RESUME }
                 };
                 Utils.sendMessageToSender(message);
                 Page.message.set('');
@@ -387,7 +379,7 @@ var tvApp = {
 
             var message = {
                 "event": "MEDIA_PLAYBACK",
-                "media_event": { "event" : "slideshowstarted" }
+                "media_event": { "event" : Constants.MediaEvent.SLIDESHOW_STARTED }
             };
             Utils.sendMessageToSender(message);
         });
@@ -400,7 +392,7 @@ var tvApp = {
 
             var message = {
                 "event": "MEDIA_PLAYBACK",
-                "media_event": { "event" : "slideshowstopped" }
+                "media_event": { "event" : Constants.MediaEvent.SLIDESHOW_STOPPED }
             };
             Utils.sendMessageToSender(message);
         });
@@ -427,14 +419,14 @@ var tvApp = {
 
             var message = {
                 "event": "MEDIA_PLAYBACK",
-                "media_event": { "event" : "mediastopped" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_STOPPED }
             };
             Utils.sendMessageToSender(message);
 
             tvApp.player.stop();
             PictureManager.stopLoading();
 
-            tvApp.clearStage({showLoader: false});
+            Page.clearStage({showLoader: false});
             Page.headband.display(true);
         });
     }

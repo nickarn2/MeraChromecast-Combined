@@ -31,7 +31,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "abort" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_ABORT }
             };
             Utils.sendMessageToSender(message);
         }
@@ -44,7 +44,7 @@ var mPlayerCallbacks = {
             switch (media.type) {
                 case "VIDEO":
                     if (tvApp.slideshow.started) {
-                        tvApp.clearStage({showLoader: false, showCastMsg: true});
+                        Page.clearStage({showLoader: false, showCastMsg: true});
                         Page.picture.display({flag: false, elem: $('#pictures')});
 
                         PictureManager.stopLoading();
@@ -56,8 +56,8 @@ var mPlayerCallbacks = {
                 case "AUDIO":
                     if (tvApp.slideshow.started) {
                         if (!tvApp.slideshow.custom) {
-                            tvApp.clearStage({showLoader: false, showCastMsg: true});
-                            tvApp.showAudioPage();
+                            Page.clearStage({showLoader: false, showCastMsg: true});
+                            Page.musicPlayer.display();
                             Utils.ui.updatePlayerStyles();
                         }
                     }
@@ -69,12 +69,12 @@ var mPlayerCallbacks = {
             var message_1 = {
                 "event": "MEDIA_PLAYBACK",
                 "message": e.detail.url,
-                "media_event": { "event" : "loadcomplete" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_LOAD_COMPLETE }
             },
             message_2 = {
                 "event": "MEDIA_PLAYBACK",
                 "message": e.detail.url,
-                "media_event": { "event" : "canplay" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_CANPLAY }
             };
             Utils.sendMessageToSender(message_1);
             Utils.sendMessageToSender(message_2);
@@ -86,7 +86,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "canplaythrough" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_CANPLAY_THROUGH }
             };
             Utils.sendMessageToSender(message);
         }
@@ -97,7 +97,7 @@ var mPlayerCallbacks = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                 "media_event": {
-                    "event": "durationchange",
+                    "event": Constants.MediaEvent.MEDIA_DURATION_CHANGE,
                     "duration": e.detail && e.detail.duration || 0
                 }
             };
@@ -109,7 +109,7 @@ var mPlayerCallbacks = {
             var error = e && e.detail && e.detail.error;
 
             if (!tvApp.slideshow.started) {
-                tvApp.clearStage({showLoader: false});
+                Page.clearStage({showLoader: false});
 
                 PictureManager.stopLoading();
                 Page.header.display(true);
@@ -126,7 +126,7 @@ var mPlayerCallbacks = {
                 "event": "MEDIA_PLAYBACK",
                 "message": e.detail.url,
                 "media_event": {
-                    "event": "error",
+                    "event": Constants.MediaEvent.MEDIA_ERROR,
                     "code": error && error.code,
                     "description": error && error.description
                 }
@@ -141,7 +141,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "loadeddata" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_LOADED_DATA }
             };
             Utils.sendMessageToSender(message);
         }
@@ -160,7 +160,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "loadedmetadata" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_LOADED_METADATA }
             };
             Utils.sendMessageToSender(message);
         }
@@ -170,7 +170,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "loadstart" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_LOAD_START }
             };
             Utils.sendMessageToSender(message);
         }
@@ -181,7 +181,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "pause" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_PAUSE }
             };
             Utils.sendMessageToSender(message);
         }
@@ -191,7 +191,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "play" }
+                "media_event": { "event" : Constants.MediaEvent.PLAY }
             };
             Utils.sendMessageToSender(message);
         }
@@ -201,7 +201,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "playing" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_PLAYING }
             };
             Utils.sendMessageToSender(message);
         }
@@ -211,7 +211,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "progress" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_PROGRESS }
             };
             Utils.sendMessageToSender(message);
         }
@@ -222,7 +222,7 @@ var mPlayerCallbacks = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                 "media_event": {
-                    "event": "ratechange",
+                    "event": Constants.MediaEvent.MEDIA_RATECHANGE,
                     "playbackRate": e.detail && e.detail.playbackRate || 0
                 }
             };
@@ -235,7 +235,7 @@ var mPlayerCallbacks = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                 "media_event": {
-                    "event": "seeked",
+                    "event": Constants.MediaEvent.MEDIA_SEEKED,
                     "currentTime": e.detail && e.detail.currentTime || 0
                 }
             };
@@ -248,7 +248,7 @@ var mPlayerCallbacks = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                 "media_event": {
-                    "event": "seeking",
+                    "event": Constants.MediaEvent.MEDIA_SEEKING,
                     "currentTime": e.detail && e.detail.currentTime || 0
                 }
             };
@@ -260,7 +260,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "stalled" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_STALLED }
             };
             Utils.sendMessageToSender(message);
         }
@@ -270,7 +270,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "suspend" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_SUSPEND }
             };
             Utils.sendMessageToSender(message);
         }
@@ -300,7 +300,7 @@ var mPlayerCallbacks = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                 "media_event": {
-                    "event": "timeupdate",
+                    "event": Constants.MediaEvent.MEDIA_TIMEUPDATE,
                     "currentTime": e.detail && e.detail.currentTime || 0
                 }
             };
@@ -313,7 +313,7 @@ var mPlayerCallbacks = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
                 "media_event": {
-                    "event": "volumechange",
+                    "event": Constants.MediaEvent.MEDIA_VOLUME_CHANGE,
                     "volume": e.detail && e.detail.volume || 0
                 }
             };
@@ -339,7 +339,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "ended" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_ENDED }
             };
             Utils.sendMessageToSender(message);
         }
@@ -349,7 +349,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : "waiting" }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_WAITING }
             };
             Utils.sendMessageToSender(message);
         }

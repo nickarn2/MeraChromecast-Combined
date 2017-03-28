@@ -123,7 +123,7 @@ function Soundtrack(config) {
     function onCanplay() {
         self._log('event: canplay');
         self.loaded = true;
-        if (!tvApp.slideshow.paused) self.play();
+        if (tvApp.slideshow.resumed) self.play();
     }
 
     function onCanplayThrough() {
