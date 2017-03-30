@@ -205,7 +205,7 @@ var Slideshow = (function () {
             return instance.started && instance.slide === number;
         },
         isLoadingPageRequired: function() {
-            return instance.shownSlidesCount == 0;
+            return instance.started && instance.shownSlidesCount === 0;
         }
     }
 

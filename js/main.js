@@ -287,9 +287,10 @@ var tvApp = {
                 if (tvApp.slideshow.isLoadingPageRequired()) {
                     Page.clearStage({showLoader: false});
                     Page.loading.display(true);
-                    Page.thumbnail.display({flag: true, type:'video', loadThumb: true});
-                    tvApp.player.stop();
-                    Utils.triggerEvent("resume");
+                    setTimeout(function() {
+                        tvApp.player.stop();
+                        Utils.triggerEvent("resume");
+                    }, 500);
                 /*
                  * NEXT_SLIDE || PREVIOUS_SLIDE
                  * 1) Load and show thumbnail with a spinner
@@ -310,9 +311,10 @@ var tvApp = {
                  * 3) Trigger "resume" event
                  */
                 } else {
-                    Page.thumbnail.display({flag: true, type:'video', loadThumb: true});
-                    tvApp.player.stop();
-                    Utils.triggerEvent("resume");
+                    setTimeout(function() {
+                        tvApp.player.stop();
+                        Utils.triggerEvent("resume");
+                    }, 500);
                 }
             /*
              * NO SLIDESHOW

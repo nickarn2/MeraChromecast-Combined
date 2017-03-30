@@ -39,19 +39,31 @@ var mPlayerCallbacks = {
         function onCanplay(e) {
             console.log(Constants.APP_INFO, TAG, 'onCanplay: ', e);
             var media = tvApp.stateObj.media;
-            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadComplete();
 
             switch (media.type) {
                 case "VIDEO":
-                    if (tvApp.slideshow.started) {
-                        Page.clearStage({showLoader: false, showCastMsg: true});
-                        Page.picture.display({flag: false, elem: $('#pictures')});
-
-                        PictureManager.stopLoading();
-                    }
+                    Page.clearStage({showLoader: false, showCastMsg: true});
                     Utils.ui.viewManager.setView('video-player');
                     if (media.thumbnail) tvApp.playerContainer.attr("poster", media.thumbnail);
-                    Page.thumbnail.display({flag: false});
+                    /*
+                     * SLIDESHOW
+                     ******************/
+                    if (tvApp.slideshow.started) {
+                        Page.picture.display({flag: false, elem: $('#pictures')});
+                        PictureManager.stopLoading();
+
+                        if (!tvApp.slideshow.custom) {
+                            //Load thumbnail to show it when video is ended
+                            Page.thumbnail.display({flag: true, type: 'video', loadThumb: true, cb: function() {
+                                tvApp.videoThumbnail.removeClass('displayed');//Thumbnail is loaded, now hide
+                            }});
+                        } else tvApp.videoThumbnail.removeClass('displayed');
+
+                        tvApp.slideshow.onSlideLoadComplete();
+                    /*
+                     * NO SLIDESHOW
+                     ******************/
+                    } else Page.thumbnail.display({flag: false});
                     break;
                 case "AUDIO":
                     if (tvApp.slideshow.started) {
@@ -60,6 +72,7 @@ var mPlayerCallbacks = {
                             Page.musicPlayer.display();
                             Utils.ui.updatePlayerStyles();
                         }
+                        tvApp.slideshow.onSlideLoadComplete();
                     }
                     tvApp.playerContainer.find('.artwork .loader').removeClass('displayed');
                     break;
@@ -191,7 +204,7 @@ var mPlayerCallbacks = {
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
-                "media_event": { "event" : Constants.MediaEvent.PLAY }
+                "media_event": { "event" : Constants.MediaEvent.MEDIA_PLAY }
             };
             Utils.sendMessageToSender(message);
         }
