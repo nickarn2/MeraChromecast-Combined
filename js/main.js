@@ -69,8 +69,6 @@ var tvApp = {
                 orientation = tvApp.stateObj.media.exif,
                 hasOrientation = orientation !== null && orientation !== undefined;
 
-            if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadStart({type: "PICTURE"});
-
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": url,
@@ -81,29 +79,62 @@ var tvApp = {
             console.log(Constants.APP_INFO, 'url', url);
             console.log(Constants.APP_INFO, 'orientation', orientation);
 
-            if (tvApp.slideshow.isLoadingPageRequired()) {
-                if (!prepareStage.prepared) prepareStage();
-                Page.loading.display(true);
-            } else if (!tvApp.slideshow.started || tvApp.slideshow.custom) {
-                if (tvApp.stateObj.media.thumbnail) {
-                    Page.thumbnail.display({flag: true, type: 'picture', cb: function() {
-                        console.log(Constants.APP_INFO, 'Stage is prepared', prepareStage.prepared);
-                        if (!prepareStage.prepared) prepareStage();
-                        tvApp.videoThumbnail.addClass('displayed');
-                    }});
+            /*
+             * SLIDESHOW
+             ********************************************************************************/
+            if (tvApp.slideshow.started) {
+                tvApp.slideshow.onSlideLoadStart({type: "PICTURE"});
+
+                /*
+                 * FIRST SLIDE
+                 * Show loading page
+                 */
+                if (tvApp.slideshow.isLoadingPageRequired()) {
+                    showLoadingPage();
+                /*
+                 * NEXT_SLIDE || PREVIOUS_SLIDE
+                 * Show audio page with spinner above thumbnail
+                 */
+                } else if (tvApp.slideshow.custom) {
+                    if (tvApp.stateObj.media.thumbnail) showThumbnail();
+                    else showLoadingPage();
+                /*
+                 * AUTO SLIDE
+                 */
                 } else {
-                    if (!prepareStage.prepared) prepareStage();
-                    Page.loading.display(true);
+                    //Just load picture in background then show
                 }
+
+
+                if (Animation.getType() == 'MOSAIC' && !Animation.mosaic.initialized) {
+                    $.when(Animation.mosaic.init())
+                    .done(function() {
+                        console.log(Constants.APP_INFO, 'Animation mosaic: initialized');
+                        displayImage();
+                    });
+                } else displayImage();
+            /*
+             * NO SLIDESHOW
+             ********************************************************************************/
+            } else {
+                if (tvApp.stateObj.media.thumbnail) showThumbnail();
+                else showLoadingPage();
+
+                displayImage();
             }
 
-            if (tvApp.slideshow.started && Animation.getType() == 'MOSAIC' && !Animation.mosaic.initialized) {
-                $.when(Animation.mosaic.init())
-                .done(function() {
-                    console.log(Constants.APP_INFO, 'Animation mosaic: initialized');
-                    displayImage();
-                });
-            } else displayImage();
+            function showThumbnail() {
+                Page.thumbnail.display({flag: true, type: 'picture', cb: function() {
+                    console.log(Constants.APP_INFO, 'Stage is prepared', prepareStage.prepared);
+                    if (!prepareStage.prepared) prepareStage();
+                    tvApp.videoThumbnail.addClass('displayed');
+                }});
+            }
+
+            function showLoadingPage() {
+                if (!prepareStage.prepared) prepareStage();
+                Page.loading.display(true);
+            }
 
             function prepareStage() {
                 prepareStage.prepared = true;
@@ -130,9 +161,7 @@ var tvApp = {
 
                 function onLoadImageSuccess() {
                     console.log(Constants.APP_INFO, 'onLoadImageSuccess');
-
                     if (!prepareStage.prepared) prepareStage();
-                    Utils.ui.viewManager.setView('photo');
 
                     /*Here image is fully loaded and displayed*/
                     if (hasOrientation) bPicture.rotate(orientation);
@@ -144,17 +173,26 @@ var tvApp = {
 
                     Animation.reset(bPicture.getContainer(), tPicture.getContainer());
 
-                    if (tvApp.slideshow.started &&
-                        !tvApp.slideshow.isLoadingPageRequired() &&
-                        !tvApp.slideshow.custom &&
-                        Utils.ui.viewManager.getRecentViewInfo().mode == 'photo'
-                    ) {
-                        PictureManager.animate(bPicture, tPicture);
+                    if (tvApp.slideshow.started) {
+                        /*
+                         * AUTO SLIDE
+                         * It's the only case when we need animation
+                         */
+                        if (!tvApp.slideshow.isLoadingPageRequired() &&
+                            !tvApp.slideshow.custom &&
+                            Utils.ui.viewManager.getRecentViewInfo().mode == 'photo') {
+                            PictureManager.animate(bPicture, tPicture);
+                        /*
+                         * FIRST SLIDE || NEXT_SLIDE || PREVIOUS_SLIDE
+                         */
+                        } else tPicture.hide();
+
+                        tvApp.slideshow.onSlideLoadComplete();
                     } else {
                         tPicture.hide();
                     }
 
-                    if (tvApp.slideshow.started) tvApp.slideshow.onSlideLoadComplete();
+                    Utils.ui.viewManager.setView('photo');
 
                     var message = {
                         "event": "MEDIA_PLAYBACK",
@@ -367,8 +405,8 @@ var tvApp = {
                 Utils.sendMessageToSender(message);
                 Page.message.set('');
 
-                if (!Utils.isEventValid()) return;
                 if (tvApp.slideshow.started) tvApp.slideshow.resume();
+                if (!Utils.isEventValid()) return;
                 tvApp.player.resume();
             }
         });

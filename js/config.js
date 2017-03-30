@@ -6,7 +6,7 @@ var Config = (function(){
 
     return {
         app: {
-            version: '2.1.1',
+            version: '2.1.2',
             tv_type: 'gcast'
         }
     }
