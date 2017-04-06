@@ -23,13 +23,6 @@ function MediaPlayer(config) {
         console.log(self._appInfo, self._className, 'Id: ' + self._player.id, info);
     }
 
-    /*self.state = STATE[0];
-    self._STATE = [
-        "NONE",     // 0: initial state
-        "PAUSED",   // 1: paused
-        "RESUMED"   // 2: resumed
-    ];*/
-
     /**
      * Start media playback.
      *
@@ -51,7 +44,6 @@ function MediaPlayer(config) {
         if (self._player.src && self._player.src.length) {
             self._log('stop playback:' + self._player.src);
             self._player.pause();
-            //self.state = STATE[0];
             self._player.src = "";
             self._player.removeAttribute('src');
             self._player.load();//force buffering
@@ -69,13 +61,11 @@ function MediaPlayer(config) {
 
         self._log('pause ' + self._player.src);
         self._player.pause();
-        //self.state = STATE[1];
     };
     self.resume = function() {
         if ( !self._player ) return;
 
         self._log('resume ' + self._player.src);
         self._player.play();
-        //self.state = STATE[2];
     };
 }

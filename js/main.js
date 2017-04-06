@@ -219,7 +219,7 @@ var tvApp = {
                         $('.page').removeClass('displayed');
                         Page.header.display(true);
                         Page.message.set(error.description).display()
-                    } else tvApp.slideshow.onSlideLoadError();
+                    }
 
                     /* Send messages to Sender app*/
                     var message_1 = {

@@ -7,7 +7,8 @@
  */
 var FastCast = (function(){
 
-    var clientCallbacks = {};
+    var clientCallbacks = {},
+        TAG = "FastCast";
 
     /**
      * Returns handler registered to the event.
@@ -69,11 +70,11 @@ var FastCast = (function(){
      */
     function init(namespace, callback) {
         window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
-        console.log(Constants.APP_INFO, 'Starting Receiver Manager');
+        console.log(Constants.APP_INFO, TAG, 'Starting Receiver Manager');
 
         // handler for the 'ready' event
         window.castReceiverManager.onReady = function(event) {
-            console.log(Constants.APP_INFO, 'Received Ready event: ' + JSON.stringify(event.data));
+            console.log(Constants.APP_INFO, TAG, 'Received Ready event: ' + JSON.stringify(event.data));
             window.castReceiverManager.setApplicationState("Application status is ready...");
         };
 
@@ -82,7 +83,7 @@ var FastCast = (function(){
 
         // handler for the CastMessageBus message event
         window.messageBus.onMessage = function(event) {
-            console.log(Constants.APP_INFO, 'Message [' + event.senderId + ']: ' + event.data);
+            console.log(Constants.APP_INFO, TAG, 'Message [' + event.senderId + ']: ' + event.data);
             tvApp.senderId = event.senderId;
 
             try {
@@ -95,7 +96,7 @@ var FastCast = (function(){
                 switch(event) {
                     case 'LOAD_START':
                         tvApp.stateObj.loadStarted = false;
-                        console.log(Constants.APP_INFO, type);
+                        console.log(Constants.APP_INFO, TAG, type);
 
                         type = type && typeof type == 'string' && type.toLowerCase();
                         Utils.triggerEvent("load_start_"+type, parsed);
@@ -113,13 +114,13 @@ var FastCast = (function(){
                         break;
                 }
             } catch (event) {
-                console.log(Constants.APP_INFO, 'Parse message error: ', event);
+                console.log(Constants.APP_INFO, TAG, 'Parse message error: ', event);
             }
         }
 
         // initialize the CastReceiverManager with an application status message
         window.castReceiverManager.start({statusText: "Application is starting"});
-        console.log(Constants.APP_INFO, 'Receiver Manager started');
+        console.log(Constants.APP_INFO, TAG, 'Receiver Manager started');
 
         callback && callback();
     }

@@ -291,6 +291,7 @@ var Utils = (function(){
      * @param {Object} message Event message {detail: <value>}
      */
     function triggerEvent(event, message) {
+        console.log(Constants.APP_INFO, TAG, 'triggerEvent', event, JSON.stringify(message));
         if (typeof event !== 'string') return;
 
         var customEvent = new CustomEvent(event, {detail: message});

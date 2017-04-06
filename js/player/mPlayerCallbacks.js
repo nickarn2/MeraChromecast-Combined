@@ -127,7 +127,7 @@ var mPlayerCallbacks = {
                 PictureManager.stopLoading();
                 Page.header.display(true);
                 Page.message.set((error && error.description) || Constants.FAILED_TO_LOAD_MSG).display();
-            } else tvApp.slideshow.onSlideLoadError();
+            }
 
             /* Send messages to Sender app*/
             var message_1 = {
@@ -345,8 +345,6 @@ var mPlayerCallbacks = {
                     else Page.thumbnail.display({flag: true, type:'video', showOnlyThumb: true, cache: true});
                     break;
             }
-
-            if (tvApp.slideshow.started) tvApp.slideshow.onSlideMediaEnded();
 
             /* Send messages to Sender app*/
             var message = {

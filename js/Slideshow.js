@@ -6,9 +6,6 @@ var Slideshow = (function () {
 
     var TAG = "Slideshow";
     var soundtrackUrl = null;
-    var timeoutId = null;
-    var pictureSlideTimeout = null;
-    var defaultTimeout = 3000;
     var slideTaskTimeoutId = null;
 
     var slideState = {};
@@ -56,14 +53,12 @@ var Slideshow = (function () {
             slideDuration = duration + animationDuration;
             instance.setSoundTrackUrl(config.media);
 
-            pictureSlideTimeout =  slideDuration + defaultTimeout;
             Animation.config({
                 type: config && config.type,
                 duration: config && config.animation_duration
             });
 
             document.addEventListener('onMediaEvent', instance.onMediaEvent);
-            console.log(Constants.APP_INFO, TAG, 'Picture slide timeout: ', pictureSlideTimeout);
         },
         stop: function() {
             instance.started = false;
@@ -73,7 +68,6 @@ var Slideshow = (function () {
 
             tvApp.soundtrack.stop();
             instance.setSoundTrackUrl(null);
-            clearTimeoutSlideshow();
             slideState = {};
 
             document.removeEventListener('onMediaEvent', instance.onMediaEvent);
@@ -86,8 +80,6 @@ var Slideshow = (function () {
             Page.message.set('<span> PAUSED </span>').display();
             tvApp.pause();
 
-            clearTimeoutSlideshow();
-
             var message = {
                 "event": "MEDIA_PLAYBACK",
                 "message": tvApp.stateObj.media && tvApp.stateObj.media.url || "",
@@ -98,10 +90,7 @@ var Slideshow = (function () {
         resume: function() {
             instance.resumed = true;
             if (Utils.ui.viewManager.getRecentViewInfo().mode == 'photo') {
-                stopSlideshowByTimeout(pictureSlideTimeout);
                 if (tvApp.soundtrack.loaded) tvApp.soundtrack.resume();
-            } else {
-                if (slideState.status == Constants.MediaEvent.MEDIA_ENDED) stopSlideshowByTimeout(defaultTimeout);
             }
         },
         next: function() {
@@ -114,7 +103,7 @@ var Slideshow = (function () {
         },
         onMediaEvent: function(e) {
             var event = e && e.detail && e.detail.event;
-            console.log('onMediaEvent', event);
+            console.log(Constants.APP_INFO, TAG, 'onMediaEvent', event);
 
             switch (event) {
                 // stop slide show
@@ -162,10 +151,8 @@ var Slideshow = (function () {
             }
         },
         onSlideLoadStart: function(slideInfo) {
-            clearTimeoutSlideshow();
             slideState = {
-                type: slideInfo && slideInfo.type,
-                status: 'loadstart'
+                type: slideInfo && slideInfo.type
             }
             if (slideState.type == 'PICTURE') {
                 if (!tvApp.soundtrack.url) {
@@ -176,20 +163,9 @@ var Slideshow = (function () {
         },
         onSlideLoadComplete: function() {
             turnOffCustomSlideshow();
-
-            slideState.status = Constants.MediaEvent.MEDIA_LOAD_COMPLETE;
             instance.shownSlidesCount += 1;
 
-            if (slideState.type == 'PICTURE') stopSlideshowByTimeout(pictureSlideTimeout);
-            else tvApp.soundtrack.stop();
-        },
-        onSlideLoadError: function() {
-            slideState.status = Constants.MediaEvent.MEDIA_ERROR;
-            stopSlideshowByTimeout(defaultTimeout);
-        },
-        onSlideMediaEnded: function() {
-            slideState.status = Constants.MediaEvent.MEDIA_ENDED;
-            stopSlideshowByTimeout(defaultTimeout);
+            if (slideState.type !== 'PICTURE') tvApp.soundtrack.stop();
         },
         setSoundTrackUrl: function(media) {
             if (media && media.url && media.type == 'AUDIO')  soundtrackUrl = media.url;
@@ -302,7 +278,7 @@ var Slideshow = (function () {
 
         if (instance.slide < 0) {
             instance.slide = instance.isSlideRepeated ? slideDescriptions.length - 1 : 0;
-        } else if (instance.slide == slideDescriptions.length) {
+        } else if (instance.slide == slideDescriptions.length && instance.isSlideRepeated) {
             instance.slide = 0;
         }
 
@@ -375,29 +351,6 @@ var Slideshow = (function () {
      */
     function turnOffCustomSlideshow() {
         instance.custom = false;
-    }
-
-    /**
-     * @function stopSlideshowByTimeout
-     * If TV didn't receive message to play next slide in some timeout - stop it
-     */
-    function stopSlideshowByTimeout(timeout) {
-        timeout = timeout || defaultTimeout;
-        console.log(Constants.APP_INFO, TAG, 'Stop slideshow by timeout: ', timeout);
-
-        timeoutId = setTimeout(function() {
-            console.log(Constants.APP_INFO, TAG, 'Timed out');
-            stopMedia();//then it will trigger stop_slideshow event
-        }, timeout);
-    }
-
-    /**
-     * @function clearTimeoutSlideshow
-     * Clear timeout on load start event, on pause, on stop slideshow
-     */
-    function clearTimeoutSlideshow() {
-        console.log(Constants.APP_INFO, TAG, 'Clear timeout');
-        clearTimeout(timeoutId);
     }
 
     return {
