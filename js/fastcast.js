@@ -8,7 +8,8 @@
 var FastCast = (function(){
 
     var clientCallbacks = {},
-        TAG = "FastCast";
+        TAG = "FastCast",
+        chunkMessage = null;
 
     /**
      * Returns handler registered to the event.
@@ -111,6 +112,30 @@ var FastCast = (function(){
                     case 'PREVIOUS_SLIDE':
                         event = event.toLowerCase();
                         Utils.triggerEvent(event, parsed);
+                        break;
+                    case 'CHUNK_MESSAGE':
+                        chunkMessage = null;
+                        try {
+                            chunkMessage = new ChunkMessage(parsed.id, parsed.chunk_count);
+                            console.log(Constants.APP_INFO, TAG, 'Chunk message obj', chunkMessage);
+                        } catch(e) {
+                            console.log(Constants.APP_INFO, TAG, 'Chunk message obj creation error', e);
+                        }
+                        break;
+                    case 'CHUNK_PART':
+                        if (!chunkMessage) break;
+                        try {
+                            chunkMessage.addChunk(parsed.id, parsed.chunk_index, parsed.message);
+                            console.log(Constants.APP_INFO, TAG, 'Chunk message "'+ parsed.chunk_index +'" is added');
+                            if (chunkMessage.received) {
+                                var message = JSON.parse(chunkMessage.message);
+                                event = message.event && message.event.toLowerCase();
+                                console.log(Constants.APP_INFO, TAG, 'Chunk message received');
+                                Utils.triggerEvent(event, message);
+                            }
+                        } catch(e) {
+                            console.log(Constants.APP_INFO, TAG, 'Chunk part error', e);
+                        }
                         break;
                 }
             } catch (event) {
