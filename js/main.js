@@ -424,6 +424,16 @@ var tvApp = {
             Utils.sendMessageToSender(message);
         });
         /*
+         * Event add_slideshow
+         */
+        this.eventBus.addEventListener('add_slideshow', function(e) {
+            console.log(Constants.APP_INFO, 'add_slideshow', e);
+            var slides = e && e.detail && e.detail.slides;
+            if (tvApp.slideshow.started && slides && slides.length) {
+                tvApp.slideshow.addSlides(slides);
+            }
+        });
+        /*
          * Event stop_slideshow
          */
         this.eventBus.addEventListener('stop_slideshow', function() {

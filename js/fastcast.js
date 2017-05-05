@@ -84,7 +84,6 @@ var FastCast = (function(){
 
         // handler for the CastMessageBus message event
         window.messageBus.onMessage = function(event) {
-            console.log(Constants.APP_INFO, TAG, 'Message [' + event.senderId + ']: ' + event.data);
             tvApp.senderId = event.senderId;
 
             try {
@@ -106,6 +105,7 @@ var FastCast = (function(){
                     case 'RESUME':
                     case 'PAUSE':
                     case 'START_SLIDESHOW':
+                    case 'ADD_SLIDESHOW':
                     case 'STOP_SLIDESHOW':
                     case 'STOP_MEDIA':
                     case 'NEXT_SLIDE':

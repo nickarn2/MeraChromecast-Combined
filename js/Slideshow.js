@@ -60,6 +60,12 @@ var Slideshow = (function () {
 
             document.addEventListener('onMediaEvent', instance.onMediaEvent);
         },
+        addSlides: function(descriptions) {
+            console.log(Constants.APP_INFO, TAG, 'Add ' + descriptions.length + ' slides to slideshow');
+
+            slideDescriptions = slideDescriptions.concat(descriptions);
+            console.log(Constants.APP_INFO, TAG, 'Current slides count is ' + slideDescriptions.length);
+        },
         stop: function() {
             instance.started = false;
             instance.custom = false;
