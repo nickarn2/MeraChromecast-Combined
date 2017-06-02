@@ -179,6 +179,10 @@ var mPlayerCallbacks = {
         }
 
         function onLoadstart() {
+            // stop music background before playing video
+            if (tvApp.stateObj.media.type == 'VIDEO') {
+                tvApp.soundtrack.stop();
+            }
             /* Send messages to Sender app*/
             var message = {
                 "event": "MEDIA_PLAYBACK",
