@@ -149,6 +149,7 @@ function Soundtrack(config) {
 
     function onLoadstart() {
         self._log('event: loadstart');
+        tvApp.player.stop();
     }
 
     function onPause() {
