@@ -66,6 +66,8 @@
         </div>
         <div id="player-container" class="page">
             <video id="html5-player" class="fullscreen" autoplay></video>
+            <!-- <cast-media-player></cast-media-player> -->
+            <!-- <cast-media-player id="html5-player" class="fullscreen" autoplay></cast-media-player> -->
 
             <div class="info-box">
                 <div class="artwork">
@@ -95,7 +97,10 @@
             <div class="message centeredY"></div>
         </div>
 
-        <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+        <!-- Web Receiver SDK -->
+        <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+        <!-- Cast Debug Logger -->
+        <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>
         <script src="libs/jquery-3.1.0.min.js"></script>
         <!--
             exif.js : vendor library

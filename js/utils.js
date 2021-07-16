@@ -273,9 +273,8 @@ var Utils = (function(){
      */
     function sendMessageToSender(dataObj) {
         try {
-            if (!window.messageBus || !tvApp.senderId || !dataObj) return;
             var data = JSON.stringify(dataObj);
-            window.messageBus.send(tvApp.senderId, data);
+            FastCast.sendTheMessage(dataObj);
 
             if (dataObj.media_event && dataObj.media_event.event) {
                 triggerEvent("onMediaEvent", {event: dataObj.media_event.event});
