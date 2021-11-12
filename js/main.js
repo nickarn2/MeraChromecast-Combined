@@ -483,14 +483,16 @@ var tvApp = {
 };
 
 window.onload = function() {
+    debugger;
+    var titl =  document.getElementById("contentWelcomeTitle");
+    var titl2 =  document.getElementById('contentWelcomeTitle');
+    document.getElementById("contentWelcomeTitle").innerHTML = "New text!";
+
     tvApp.init();
     // Turn on debugging so that you can see what is going on.  Please turn this off
     // on your production receivers to improve performance.
     const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
     castDebugLogger.setEnabled(true);
-    var titl =  document.getElementById("contentWelcomeTitle");
-    var titl2 =  document.getElementById('contentWelcomeTitle');
-    document.getElementById("contentWelcomeTitle").innerHTML = "New text!";
 
     FastCast.init(Constants.APP_NAMESPACE, function(){
         FastCast.onSenderConnected(function(event) {
