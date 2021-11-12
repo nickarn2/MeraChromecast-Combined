@@ -60,7 +60,7 @@ var tvApp = {
          * Event load_start_picture
          * Fires when LOAD_START event is received to show picture
          */
-        this.eventBus.addEventListener('load_start_picture', function(e) {
+        this.eventBus.addEventListener('load_start_picture', function(e) {//nn
             console.log(Constants.APP_INFO, 'load_start_picture', e);
             tvApp.stateObj = e.detail;
             if (!tvApp.stateObj.media) return;
@@ -488,6 +488,8 @@ window.onload = function() {
     // on your production receivers to improve performance.
     const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
     castDebugLogger.setEnabled(true);
+    
+    document.getElementById("contentWelcomeTitle").innerHTML = "New text!";
 
     FastCast.init(Constants.APP_NAMESPACE, function(){
         FastCast.onSenderConnected(function(event) {
