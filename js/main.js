@@ -488,7 +488,8 @@ window.onload = function() {
     // on your production receivers to improve performance.
     const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
     castDebugLogger.setEnabled(true);
-    
+    var titl =  document.getElementById("contentWelcomeTitle");
+    var titl2 =  document.getElementById('contentWelcomeTitle');
     document.getElementById("contentWelcomeTitle").innerHTML = "New text!";
 
     FastCast.init(Constants.APP_NAMESPACE, function(){
