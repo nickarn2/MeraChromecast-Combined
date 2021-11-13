@@ -101,7 +101,17 @@ body {
     font-weight: 600;
     font-size: 1.8em;
     color: #cd040b;
+    --my-property: "MY MY";
+    
 }
+.content-welcome-title::after {
+    content: "New text";
+    text-indent: 0;
+    display: block;
+    line-height: initial; /* New content takes up original line height */
+  }
+
+
 .content-headband .headband .content-welcome .content-welcome-text {
     width: 100%;
     line-height: 1.67;

@@ -485,8 +485,16 @@ var tvApp = {
 window.onload = function() {
     debugger;
     var titl =  document.getElementById("contentWelcomeTitle");
+
+    const element = document.querySelector('.content-welcome-title')
+    const fontSize = element.style.getPropertyValue('--my-property') ;
+    const two = titl.style.getPropertyValue('--my-property') ;
+    const three = titl.style.cssText;
+    // console.log(fontSize) // 2em
+
+
     var titl2 =  document.getElementById('contentWelcomeTitle');
-    document.getElementById("contentWelcomeTitle").innerHTML = "New text!";
+    document.getElementById("contentWelcomeTitle").innerHTML = "_Welcome to Cloud View_";
 
     tvApp.init();
     // Turn on debugging so that you can see what is going on.  Please turn this off
