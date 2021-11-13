@@ -120,6 +120,19 @@ body {
     font-size: 1.5em;
     color: #333;
 }
+.content-welcome-text {
+    width: 100%;
+    line-height: 1.67;
+    font-family: NHaasGroteskTXStd-65Md;
+    font-weight: 600;
+    font-size: 1.5em;
+    color: #333;
+    --my-property: 'MY MY';
+}
+
+
+
+
 .content-headband .headband .content-device {
     float: right;
     width: 50%;

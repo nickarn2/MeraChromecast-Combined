@@ -492,6 +492,10 @@ window.onload = function() {
     const three = titl.style.cssText;
     // console.log(fontSize) // 2em
 
+    var welcomTextElement = document.querySelector('.content-welcome-text') 
+    var welcomeTextProperty = welcomTextElement.getPropertyValue('--my-property') ;
+    welcomTextElement.innerHTML = welcomeTextProperty;
+
 
     var titl2 =  document.getElementById('contentWelcomeTitle');
     document.getElementById("contentWelcomeTitle").innerHTML = "_Welcome to Cloud View_";
