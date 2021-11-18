@@ -484,23 +484,43 @@ var tvApp = {
 
 window.onload = function() {
     debugger;
-    var titl =  document.getElementById("contentWelcomeTitle");
-
-    const element = document.querySelector('.content-welcome-title')
-    const fontSize = element.style.getPropertyValue('--my-property') ;
-    const two = titl.style.getPropertyValue('--my-property') ;
-    const three = titl.style.cssText;
-    // console.log(fontSize) // 2em
-
-    var welcomTextElement = document.querySelector('.content-welcome-text') 
-    var welcomeTextProperty = welcomTextElement.getPropertyValue('--my-property') ;
-    welcomTextElement.innerHTML = welcomeTextProperty;
 
 
-    var titl2 =  document.getElementById('contentWelcomeTitle');
-    document.getElementById("contentWelcomeTitle").innerHTML = "_Welcome to Cloud View_";
 
+    const title =  document.getElementById("contentWelcomeTitle");
+    title.innerHTML = getComputedStyle(document.getElementById("contentWelcomeTitle")).getPropertyValue("--custom-text");
+    
     tvApp.init();
+    
+    // const welcomeText =  document.getElementById("contentWelcomeText");
+    // welcomeText.innerHTML = getComputedStyle(document.getElementById("contentWelcomeText")).getPropertyValue("--custom-text");
+
+//    contentWelcomeText
+
+
+    // const theTitle = document.getElementById("contentWelcomeTitle"));
+    // const customText = getComputedStyle(theTitle.getPropertyValue("--custom-text"));
+    // theTitle.innerHTML = customText;
+    
+
+    // const element = document.querySelector('.content-welcome-title')
+    // const elementPropertyValue = element.style.getPropertyValue('--my-property') ;
+    // element.innerHTML = elementPropertyValue;
+
+
+    // const two = titl.style.getPropertyValue('--my-property') ;
+    // const three = titl.style.cssText;
+    // // console.log(fontSize) // 2em
+
+    // const welcomTextElement = document.querySelector('.content-welcome-text');
+    // var welcomeTextProperty = welcomTextElement.style.getPropertyValue('--my-property') ;
+    // welcomTextElement.innerHTML = welcomeTextProperty;
+
+
+    // var titl2 =  document.getElementById('contentWelcomeTitle');
+    // document.getElementById("contentWelcomeTitle").innerHTML = "_Welcome to Cloud View_";
+
+ //   tvApp.init();
     // Turn on debugging so that you can see what is going on.  Please turn this off
     // on your production receivers to improve performance.
     const castDebugLogger = cast.debug.CastDebugLogger.getInstance();

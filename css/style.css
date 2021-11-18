@@ -101,17 +101,7 @@ body {
     font-weight: 600;
     font-size: 1.8em;
     color: #cd040b;
-    --my-property: "MY MY";
-    
 }
-.content-welcome-title::after {
-    content: "New text";
-    text-indent: 0;
-    display: block;
-    line-height: initial; /* New content takes up original line height */
-  }
-
-
 .content-headband .headband .content-welcome .content-welcome-text {
     width: 100%;
     line-height: 1.67;
@@ -120,24 +110,28 @@ body {
     font-size: 1.5em;
     color: #333;
 }
-.content-welcome-text {
-    width: 100%;
-    line-height: 1.67;
-    font-family: NHaasGroteskTXStd-65Md;
-    font-weight: 600;
-    font-size: 1.5em;
-    color: #333;
-    --my-property: 'MY MY';
+
+#contentWelcomeTitle { 
+    --custom-text: Welcome to Cloud View ;
 }
 
-
-
+#contentWelcomeText {
+    --custom-text: Now that you are connected, just select some photos, videos or songs to enjoy on your TV.;
+}
 
 .content-headband .headband .content-device {
     float: right;
     width: 50%;
     height: 100%;
 }
+
+.error-text::before {
+    content: "Before-before ";
+}
+.error-text::after {
+    content: "After-after ";
+}
+
 .content-headband .headband .content-device > img {
     object-fit: contain;
     width: 32%;

@@ -19,7 +19,7 @@
         preloader.onload = function () {
             console.log(Constants.APP_INFO, 'Load image success: ', src);
 
-            Utils.ui.setVendorStyle(picture, "transform", "none");
+            Utils.ui.setVendorStyle(picture, "transform", "none");//nn
             picture.css('backgroundImage', 'url(' + src + ')');
 
             onSuccess();
