@@ -489,8 +489,6 @@ window.onload = function() {
     // const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
     // castDebugLogger.setEnabled(true);
 
-//    document.title = getComputedStyle(document.getElementById("header-title")).getPropertyValue("--custom-text");
-
     FastCast.init(Constants.APP_NAMESPACE, function(){
         FastCast.onSenderConnected(function(event) {
             console.log(Constants.APP_INFO, 'Received Sender Connected event: ' + event.data);
@@ -502,9 +500,7 @@ window.onload = function() {
             //if (window.castReceiverContext.getSenders().length == 0) window.close();
         });
         FastCast.connect();
-    document.title = getComputedStyle(document.getElementById("header-title")).getPropertyValue("--custom-text");
     });
 
-    document.title = "PROM";//getComputedStyle(document.getElementById("header-tttle")).getPropertyValue("--custom-text");
-
+    document.title = getComputedStyle(document.getElementById("header-title")).getPropertyValue("--custom-text");
 };
