@@ -535,7 +535,6 @@ body {
 .loading-cloud-text::before {
     content: " Cloud View ";
 }
-
-#header-tetle {
+#header-title {
     --custom-text: Device Support Cloud App;
 }
