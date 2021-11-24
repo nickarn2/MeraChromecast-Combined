@@ -487,6 +487,8 @@ window.onload = function() {
     // Turn on debugging so that you can see what is going on.  Please turn this off
     // on your production receivers to improve performance.
 
+    document.title = getComputedStyle(document.getElementById("header-tetle")).getPropertyValue("--custom-text");
+
     FastCast.init(Constants.APP_NAMESPACE, function(){
         FastCast.onSenderConnected(function(event) {
             console.log(Constants.APP_INFO, 'Received Sender Connected event: ' + event.data);
