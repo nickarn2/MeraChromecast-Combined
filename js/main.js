@@ -502,8 +502,9 @@ window.onload = function() {
             //if (window.castReceiverContext.getSenders().length == 0) window.close();
         });
         FastCast.connect();
+    document.title = getComputedStyle(document.getElementById("header-title")).getPropertyValue("--custom-text");
     });
 
-    document.title = getComputedStyle(document.getElementById("header-tttle")).getPropertyValue("--custom-text");
+    document.title = "PROM";//getComputedStyle(document.getElementById("header-tttle")).getPropertyValue("--custom-text");
 
 };
