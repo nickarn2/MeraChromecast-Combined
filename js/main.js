@@ -60,7 +60,7 @@ var tvApp = {
          * Event load_start_picture
          * Fires when LOAD_START event is received to show picture
          */
-        this.eventBus.addEventListener('load_start_picture', function(e) {//nn
+        this.eventBus.addEventListener('load_start_picture', function(e) {
             console.log(Constants.APP_INFO, 'load_start_picture', e);
             tvApp.stateObj = e.detail;
             if (!tvApp.stateObj.media) return;
@@ -483,48 +483,13 @@ var tvApp = {
 };
 
 window.onload = function() {
-    debugger;
-
-
-
-    const title =  document.getElementById("contentWelcomeTitle");
-    title.innerHTML = getComputedStyle(document.getElementById("contentWelcomeTitle")).getPropertyValue("--custom-text");
-    
     tvApp.init();
-    
-    // const welcomeText =  document.getElementById("contentWelcomeText");
-    // welcomeText.innerHTML = getComputedStyle(document.getElementById("contentWelcomeText")).getPropertyValue("--custom-text");
-
-//    contentWelcomeText
-
-
-    // const theTitle = document.getElementById("contentWelcomeTitle"));
-    // const customText = getComputedStyle(theTitle.getPropertyValue("--custom-text"));
-    // theTitle.innerHTML = customText;
-    
-
-    // const element = document.querySelector('.content-welcome-title')
-    // const elementPropertyValue = element.style.getPropertyValue('--my-property') ;
-    // element.innerHTML = elementPropertyValue;
-
-
-    // const two = titl.style.getPropertyValue('--my-property') ;
-    // const three = titl.style.cssText;
-    // // console.log(fontSize) // 2em
-
-    // const welcomTextElement = document.querySelector('.content-welcome-text');
-    // var welcomeTextProperty = welcomTextElement.style.getPropertyValue('--my-property') ;
-    // welcomTextElement.innerHTML = welcomeTextProperty;
-
-
-    // var titl2 =  document.getElementById('contentWelcomeTitle');
-    // document.getElementById("contentWelcomeTitle").innerHTML = "_Welcome to Cloud View_";
-
- //   tvApp.init();
     // Turn on debugging so that you can see what is going on.  Please turn this off
     // on your production receivers to improve performance.
-    const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
-    castDebugLogger.setEnabled(true);
+    // const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
+    // castDebugLogger.setEnabled(true);
+
+    document.title = getComputedStyle(document.getElementById("header-tetle")).getPropertyValue("--custom-text");
 
     FastCast.init(Constants.APP_NAMESPACE, function(){
         FastCast.onSenderConnected(function(event) {
