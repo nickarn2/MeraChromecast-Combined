@@ -486,17 +486,16 @@ window.onload = function() {
     tvApp.init();
     // Turn on debugging so that you can see what is going on.  Please turn this off
     // on your production receivers to improve performance.
-    cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
 
     FastCast.init(Constants.APP_NAMESPACE, function(){
         FastCast.onSenderConnected(function(event) {
             console.log(Constants.APP_INFO, 'Received Sender Connected event: ' + event.data);
-            console.log(Constants.APP_INFO, window.castReceiverManager.getSender(event.data).userAgent);
+            console.log(Constants.APP_INFO, window.castReceiverContext.getSender(event.data).userAgent);
         });
 
         FastCast.onSenderDisconnected(function(event) {
             console.log(Constants.APP_INFO, 'Received Sender Disconnected event: ' + event.data);
-            //if (window.castReceiverManager.getSenders().length == 0) window.close();
+            //if (window.castReceiverContext.getSenders().length == 0) window.close();
         });
         FastCast.connect();
     });

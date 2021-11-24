@@ -111,9 +111,9 @@ var Page = (function(){
             videoThumbnail = tvApp.videoThumbnail,
             thumbnailUrl = tvApp.stateObj.media.thumbnail,
             DEFAULT_THUMBNAIL = {
-                video:      'images/song-default@3x.png',
-                picture:    'images/song-default@3x.png',
-                default:    'images/song-default@3x.png'
+                video:      'images/placeholder-video.png',
+                picture:    'images/placeholder-photo.png',
+                default:    'images/placeholder-song.png'
             };
 
         if (!flag) {
