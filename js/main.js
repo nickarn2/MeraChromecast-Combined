@@ -489,7 +489,7 @@ window.onload = function() {
     // const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
     // castDebugLogger.setEnabled(true);
 
-    document.title = getComputedStyle(document.getElementById("header-title")).getPropertyValue("--custom-text");
+//    document.title = getComputedStyle(document.getElementById("header-title")).getPropertyValue("--custom-text");
 
     FastCast.init(Constants.APP_NAMESPACE, function(){
         FastCast.onSenderConnected(function(event) {
@@ -503,4 +503,7 @@ window.onload = function() {
         });
         FastCast.connect();
     });
+
+    document.title = getComputedStyle(document.getElementById("header-tttle")).getPropertyValue("--custom-text");
+
 };
