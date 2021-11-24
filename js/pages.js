@@ -254,7 +254,7 @@ var Page = (function(){
         //checking if thumbnail is present is inside the following function
         Utils.ui.setArtwork(tvApp.playerContainer.find(".artwork"), tvApp.stateObj.media.thumbnail);
         Utils.ui.setMediaInfo(tvApp.playerContainer.find(".info"), tvApp.stateObj);
-        //Utils.ui.updatePlayerCurtimeLabel();
+        Utils.ui.updatePlayerCurtimeLabel();
         Page.header.display(true); // display a header with Verizon logo
     }
 

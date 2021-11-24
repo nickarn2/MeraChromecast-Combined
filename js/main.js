@@ -486,6 +486,8 @@ window.onload = function() {
     tvApp.init();
     // Turn on debugging so that you can see what is going on.  Please turn this off
     // on your production receivers to improve performance.
+    // const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
+    // castDebugLogger.setEnabled(true);
 
     document.title = getComputedStyle(document.getElementById("header-tetle")).getPropertyValue("--custom-text");
 
