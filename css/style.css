@@ -40,11 +40,10 @@ body {
     width: 100%;
     height: 100%;
     margin-left: 6%;
-
     background-size: auto 40%;
     background-position: 0 50%;
     background-repeat: no-repeat;
-    background-image: url('../images/vz-logo@2x.png');
+    background-image: url('../images/app-logo@2x.png');
 }
 
 /* @2x Images (Pixel Ratio of 1.25+) */
@@ -53,7 +52,7 @@ body {
         (min--moz-device-pixel-ratio: 1.25),
         (min-device-pixel-ratio: 1.25),
         (min-resolution: 1.25dppx) {
-    .header-headband .logo {background-image:url('../images/vz-logo@2x.png');}
+    .header-headband .logo {background-image:url('../images/app-logo@2x.png');}
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
@@ -62,7 +61,7 @@ body {
         (min--moz-device-pixel-ratio: 2.25),
         (min-device-pixel-ratio: 2.25),
         (min-resolution: 2.25dppx) {
-    .header-headband .logo {background-image:url('../images/vz-logo@3x.png');}
+    .header-headband .logo {background-image:url('../images/app-logo@3x.png');}
 }
 
 .content-headband {
@@ -97,18 +96,18 @@ body {
     width: 100%;
     margin: 12% 0 2% 0;
     line-height: 1.43;
-    font-family: NHaasGroteskTXStd-75Bd;
+    font-family: Helvetica;
     font-weight: 600;
-    font-size: 1.8em;
-    color: #cd040b;
+    font-size: 1.5em;
+    color: #e60000;
 }
 .content-headband .headband .content-welcome .content-welcome-text {
     width: 100%;
     line-height: 1.67;
-    font-family: NHaasGroteskTXStd-65Md;
-    font-weight: 600;
+    font-family: Helvetica;
+    font-weight: 400;
     font-size: 1.5em;
-    color: #333;
+    color: #333333;
 }
 .content-headband .headband .content-device {
     float: right;
@@ -137,10 +136,10 @@ body {
     vertical-align: top;
     margin-left: 2%;
     line-height: 2.7;
-    font-family: NHaasGroteskTXStd-75Bd;
+    font-family: sans-serif;
     font-weight: 400;
     font-size: 1.5em;
-    color: #cd040b;
+    color: #000000;
 }
 .content-headband .loading-loader {
     height: 20%;
@@ -160,7 +159,7 @@ body {
     height: 43%;
     padding-top: 8%;
     text-align: center;
-    font-family: NHaasGroteskTXStd-65Md;
+    font-family: sans-serif;
     font-weight: 400;
     font-size: 1.3em;
     color: #262626;
@@ -184,7 +183,7 @@ body {
 }
 #thumbnail .play-button {
     display: none;
-    background-image: url('../images/video-play.png') no-repeat;
+    background-image: url('../images/video-play.png');
     background-size: auto 18%;
     background-position: 50% 50%;
     background-repeat: no-repeat;
@@ -448,7 +447,7 @@ body {
     width: 100%;
     height: 100%;
     text-align: center;
-    font-family: NHaasGroteskTXStd-65Md;
+    font-family: sans-serif;
     font-weight: 400;
     font-size: 2em;
     color: #333;
@@ -513,4 +512,29 @@ body {
 
 .info .desc {
     color: rgb(200, 200, 200);/*grey*/
+}
+/* Product specific resources */
+.content-welcome-logo {
+    content:url("../images/app-icon.png");
+}
+
+.content-welcome-title::before {
+    content: " Welcome to Device Support Cloud View ";
+}
+
+.content-welcome-text::before {
+    content: " Now that you are connected, just select some photos, videos or songs to enjoy on your TV. ";
+}
+
+.content-device_image {
+    content:url("../images/device-example.png");
+}
+.loading-cloud-text {
+    content: " Welcome to Cloud View ";
+}
+.loading-cloud-text::before {
+    content: " Cloud View ";
+}
+#header-title {
+    --custom-text: Device Support Cloud App;
 }
