@@ -3,7 +3,7 @@
     <head>
         <link rel="stylesheet" type="text/css" href="css/style.css">
         <link rel="stylesheet" type="text/css" href="css/player-controls.css">
-        <title>Verizon Synchronoss App</title>
+        <title id="header-title">Synchronoss App</title>
     </head>
     <body>
         <div id="header" class="fullpage-bg page">
@@ -19,13 +19,13 @@
                 <div class="headband displayed">
                     <div class="content-welcome">
                         <div>
-                            <img src="./images/cloud-logo.svg">
-                            <div class="content-welcome-title"> Welcome to Cloud View </div>
-                            <div class="content-welcome-text"> Now that you are connected, just select some photos, videos or songs to enjoy on your TV. </div>
+                            <img class="content-welcome-logo">
+                            <div class="content-welcome-title"></div>
+                            <div class="content-welcome-text"></div>
                         </div>
                     </div>
                     <div class="content-device">
-                        <img src="./images/device-example.svg">
+                        <img class="content-device_image">
                     </div>
                 </div>
             </div>
@@ -37,8 +37,8 @@
             <div class="content-headband">
                 <div class="loading displayed">
                     <div class="loading-cloud-logo">
-                        <img src="./images/cloud-logo.svg">
-                        <span> Cloud View </span>
+                        <img class="content-welcome-logo">
+                        <span class="loading-cloud-text"></span>
                     </div>
                     <div class="loading-loader">
                         <img src="./images/three-dots2.svg">
@@ -66,6 +66,8 @@
         </div>
         <div id="player-container" class="page">
             <video id="html5-player" class="fullscreen" autoplay></video>
+            <!-- <cast-media-player></cast-media-player> -->
+            <!-- <cast-media-player id="html5-player" class="fullscreen" autoplay></cast-media-player> -->
 
             <div class="info-box">
                 <div class="artwork">
@@ -95,7 +97,10 @@
             <div class="message centeredY"></div>
         </div>
 
-        <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+        <!-- Web Receiver SDK -->
+        <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+        <!-- Cast Debug Logger -->
+        <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>
         <script src="libs/jquery-3.1.0.min.js"></script>
         <!--
             exif.js : vendor library

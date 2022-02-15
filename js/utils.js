@@ -30,7 +30,7 @@ var Utils = (function(){
         artworkLoader.addClass('displayed');
 
         if (artwork && artwork.length !== 0) element.css("background-image", "url(" + artwork + ")");
-        else element.css("background-image", "url(images/song-default@3x.png)");
+        else element.css("background-image", "url(images/placeholder-song.png)");
     }
 
     /**
@@ -273,9 +273,8 @@ var Utils = (function(){
      */
     function sendMessageToSender(dataObj) {
         try {
-            if (!window.messageBus || !tvApp.senderId || !dataObj) return;
             var data = JSON.stringify(dataObj);
-            window.messageBus.send(tvApp.senderId, data);
+            FastCast.sendTheMessage(dataObj);
 
             if (dataObj.media_event && dataObj.media_event.event) {
                 triggerEvent("onMediaEvent", {event: dataObj.media_event.event});

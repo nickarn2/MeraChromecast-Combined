@@ -44,7 +44,7 @@ body {
     background-size: auto 40%;
     background-position: 0 50%;
     background-repeat: no-repeat;
-    background-image: url('../images/vz-logo@2x.png');
+    background-image: url('../images/sncr-logo@2x.png');
 }
 
 /* @2x Images (Pixel Ratio of 1.25+) */
@@ -53,7 +53,7 @@ body {
         (min--moz-device-pixel-ratio: 1.25),
         (min-device-pixel-ratio: 1.25),
         (min-resolution: 1.25dppx) {
-    .header-headband .logo {background-image:url('../images/vz-logo@2x.png');}
+    .header-headband .logo {background-image:url('../images/sncr-logo@2x.png');}
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
@@ -62,7 +62,7 @@ body {
         (min--moz-device-pixel-ratio: 2.25),
         (min-device-pixel-ratio: 2.25),
         (min-resolution: 2.25dppx) {
-    .header-headband .logo {background-image:url('../images/vz-logo@3x.png');}
+    .header-headband .logo {background-image:url('../images/sncr-logo@3x.png');}
 }
 
 .content-headband {
@@ -99,8 +99,8 @@ body {
     line-height: 1.43;
     font-family: NHaasGroteskTXStd-75Bd;
     font-weight: 600;
-    font-size: 1.8em;
-    color: #cd040b;
+    font-size: 1.2em;
+    color: #0077be;
 }
 .content-headband .headband .content-welcome .content-welcome-text {
     width: 100%;
@@ -140,7 +140,7 @@ body {
     font-family: NHaasGroteskTXStd-75Bd;
     font-weight: 400;
     font-size: 1.5em;
-    color: #cd040b;
+    color: #0077be;
 }
 .content-headband .loading-loader {
     height: 20%;
@@ -184,7 +184,7 @@ body {
 }
 #thumbnail .play-button {
     display: none;
-    background-image: url('../images/video-play.png') no-repeat;
+    background-image: url('../images/video-play.png');
     background-size: auto 18%;
     background-position: 50% 50%;
     background-repeat: no-repeat;
@@ -513,4 +513,29 @@ body {
 
 .info .desc {
     color: rgb(200, 200, 200);/*grey*/
+}
+/* Product specific resources */
+.content-welcome-logo {
+    content:url("../images/wl-cloud-logo.png");
+}
+
+.content-welcome-title::before {
+    content: " Welcome to Personal Cloud View ";
+}
+
+.content-welcome-text::before {
+    content: " Now that you are connected, just select some photos, videos or songs to enjoy on your TV. ";
+}
+
+.content-device_image {
+    content:url("../images/device-example.png");
+}
+.loading-cloud-text {
+    content: " Welcome to Cloud View ";
+}
+.loading-cloud-text::before {
+    content: " Cloud View ";
+}
+#header-title {
+    --custom-text: Verizon Synchronoss App;
 }
