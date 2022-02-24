@@ -342,7 +342,7 @@ var mPlayerCallbacks = {
 
             switch (type) {
                 case 'AUDIO':
-                    //Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
+                    Utils.ui.updatePlayerCurtimeLabel.stop(); // update current time label when playback is stopped
                     break;
                 case 'VIDEO':
                     if (!tvApp.slideshow.started) Page.thumbnail.display({flag: true, type: 'video', cache: true}); // display a thumbnail

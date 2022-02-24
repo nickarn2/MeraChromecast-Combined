@@ -40,7 +40,6 @@ body {
     width: 100%;
     height: 100%;
     margin-left: 6%;
-
     background-size: auto 40%;
     background-position: 0 50%;
     background-repeat: no-repeat;
@@ -513,4 +512,33 @@ body {
 
 .info .desc {
     color: rgb(200, 200, 200);/*grey*/
+}
+
+/* Product specific resources */
+.content-welcome-logo {
+    content:url("../images/cloud-logo.svg");
+}
+
+.content-welcome-title::before {
+    content: " Welcome to Cloud View ";
+}
+
+.content-welcome-text::before {
+    content: " Now that you are connected, just select some photos, videos or songs to enjoy on your TV. ";
+}
+
+.content-device_image {
+    content:url("../images/device-example.svg");
+}
+.loading-cloud-text {
+    content: " Welcome to Cloud View ";
+}
+.loading-cloud-text::before {
+    content: " Cloud View ";
+}
+.loading-text::before {
+    content: " Loading, please wait... ";
+}
+#header-title {
+    --custom-text: Verizon Synchronoss App;
 }
