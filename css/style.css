@@ -183,7 +183,7 @@ body {
 }
 #thumbnail .play-button {
     display: none;
-    background-image: url('../images/video-play.svg') no-repeat;
+    background-image: url('../images/video-play.png') no-repeat;
     background-size: auto 18%;
     background-position: 50% 50%;
     background-repeat: no-repeat;
