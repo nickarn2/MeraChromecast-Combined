@@ -40,11 +40,10 @@ body {
     width: 100%;
     height: 100%;
     margin-left: 6%;
-
     background-size: auto 40%;
     background-position: 0 50%;
     background-repeat: no-repeat;
-    background-image: url('../images/vz-logo@2x.png');
+    background-image: url('../images/app-logo.svg');
 }
 
 /* @2x Images (Pixel Ratio of 1.25+) */
@@ -53,7 +52,7 @@ body {
         (min--moz-device-pixel-ratio: 1.25),
         (min-device-pixel-ratio: 1.25),
         (min-resolution: 1.25dppx) {
-    .header-headband .logo {background-image:url('../images/vz-logo@2x.png');}
+    .header-headband .logo {background-image:url('../images/app-logo.svg');}
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
@@ -62,7 +61,7 @@ body {
         (min--moz-device-pixel-ratio: 2.25),
         (min-device-pixel-ratio: 2.25),
         (min-resolution: 2.25dppx) {
-    .header-headband .logo {background-image:url('../images/vz-logo@3x.png');}
+    .header-headband .logo {background-image:url('../images/app-logo.svg');}
 }
 
 .content-headband {
@@ -100,7 +99,7 @@ body {
     font-family: NHaasGroteskTXStd-75Bd;
     font-weight: 600;
     font-size: 1.8em;
-    color: #cd040b;
+    color: #333;
 }
 .content-headband .headband .content-welcome .content-welcome-text {
     width: 100%;
@@ -184,7 +183,7 @@ body {
 }
 #thumbnail .play-button {
     display: none;
-    background-image: url('../images/video-play.png') no-repeat;
+    background-image: url('../images/video-play.svg') no-repeat;
     background-size: auto 18%;
     background-position: 50% 50%;
     background-repeat: no-repeat;
@@ -223,7 +222,7 @@ body {
         (min--moz-device-pixel-ratio: 1.25),
         (min-device-pixel-ratio: 1.25),
         (min-resolution: 1.25dppx) {
-    #thumbnail .play-button {background-image:url('../images/video-play@2x.png');}
+    #thumbnail .play-button {background-image:url('../images/video-play.svg');}
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
@@ -232,7 +231,7 @@ body {
         (min--moz-device-pixel-ratio: 2.25),
         (min-device-pixel-ratio: 2.25),
         (min-resolution: 2.25dppx) {
-    #thumbnail .play-button {background-image:url('../images/video-play@3x.png');}
+    #thumbnail .play-button {background-image:url('../images/video-play.svg');}
 }
 /* Video Thumbnail page (end) */
 
@@ -513,4 +512,33 @@ body {
 
 .info .desc {
     color: rgb(200, 200, 200);/*grey*/
+}
+
+/* Product specific resources */
+.content-welcome-logo {
+    content:url("../images/app-icon.svg");
+}
+
+.content-welcome-title::before {
+    content: " Welcome to Cloud View ";
+}
+
+.content-welcome-text::before {
+    content: " Now that you are connected, just select some photos, videos or songs to enjoy on your TV. ";
+}
+
+.content-device_image {
+    content:url("../images/device-example.png");
+}
+.loading-cloud-text {
+    content: " Welcome to Cloud View ";
+}
+.loading-cloud-text::before {
+    content: " Cloud View ";
+}
+.loading-text::before {
+    content: " Loading, please wait... ";
+}
+#header-title {
+    --custom-text: Verizon Synchronoss App;
 }

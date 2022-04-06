@@ -26,7 +26,7 @@ var FastCast = (function(){
     }
 
     /**
-     * Client connect from castReceiverManager.
+     * Client connect from castReceiverContext.
      * @func onSenderConnected
      * @memberof module:FastCast
      * @private
@@ -39,7 +39,7 @@ var FastCast = (function(){
     }
 
     /**
-     * Client disconnect from castReceiverManager.
+     * Client disconnect from castReceiverContext.
      * @func onSenderDisconnected
      * @memberof module:FastCast
      * @private
@@ -53,11 +53,14 @@ var FastCast = (function(){
 
     function connect() {
         // handler for 'senderconnected' event
-        window.castReceiverManager.onSenderConnected = onSenderConnected;
+        window.castReceiverContext.onSenderConnected = onSenderConnected;
         // handler for 'senderdisconnected' event
-        window.castReceiverManager.onSenderDisconnected = onSenderDisconnected;
+        window.castReceiverContext.onSenderDisconnected = onSenderDisconnected;
     }
 
+    function sendTheMessage(data) {
+        context.sendCustomMessage("urn:x-cast:com.verizon.smartview", undefined, data);
+    }
     /**
      * Initializes FastCast. Expects 2 arguments: namespace
      * and a callback function. Namespace name is required.
@@ -69,11 +72,15 @@ var FastCast = (function(){
      * @param {function} [callback] - function to be called after initialization
      * @returns {undefined}
      */
+     const context = cast.framework.CastReceiverContext.getInstance();
+     const CUSTOM_CHANNEL = "urn:x-cast:com.verizon.smartview";
+     function getTheContext() {
+        return context;
+    }
     function init(namespace, callback) {
-        window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
         console.log(Constants.APP_INFO, TAG, 'Starting Receiver Manager');
 
-        // handler for the 'ready' event
+/**        // handler for the 'ready' event
         window.castReceiverManager.onReady = function(event) {
             console.log(Constants.APP_INFO, TAG, 'Received Ready event: ' + JSON.stringify(event.data));
             window.castReceiverManager.setApplicationState("Application status is ready...");
@@ -88,56 +95,71 @@ var FastCast = (function(){
 
             try {
                 var parsed = JSON.parse(event.data);
-                var event = parsed.event;
-                var type = parsed.media && parsed.media.type;
+*/
+        const playerManager = context.getPlayerManager();
+        const options = new cast.framework.CastReceiverOptions();
+        options.maxInactivity = 3600;
 
-                if (parsed.media) tvApp.stateObj = parsed;
+        const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
+        const LOG_TAG = 'MeraChrome';
 
-                switch(event) {
-                    case 'LOAD_START':
-                        tvApp.stateObj.loadStarted = false;
-                        console.log(Constants.APP_INFO, TAG, type);
+        context.addCustomMessageListener(CUSTOM_CHANNEL, function(customEvent) {
+            // handle customEvent.
+            console.log("addCustomMessageListener: " + customEvent);
+            console.log("addCustomMessageListener: " + JSON.stringify(customEvent));
+      
+            var parsed = customEvent.data;
+            var event = parsed.event;
+            var type = parsed.media && parsed.media.type;
+        
+            if (parsed.media) tvApp.stateObj = parsed;
 
-                        type = type && typeof type == 'string' && type.toLowerCase();
-                        Utils.triggerEvent("load_start_"+type, parsed);
-                        break;
+            switch(event) {
+                case 'LOAD_START':
+                    tvApp.stateObj.loadStarted = false;
+                    console.log(Constants.APP_INFO, TAG, type);
+        
+                    type = type && typeof type == 'string' && type.toLowerCase();
+                    Utils.triggerEvent("load_start_"+type, parsed);
+                    break;
 
-                    case 'RESUME':
-                    case 'PAUSE':
-                    case 'START_SLIDESHOW':
-                    case 'ADD_SLIDESHOW':
-                    case 'STOP_SLIDESHOW':
-                    case 'STOP_MEDIA':
-                    case 'NEXT_SLIDE':
-                    case 'PREVIOUS_SLIDE':
-                        event = event.toLowerCase();
-                        Utils.triggerEvent(event, parsed);
-                        break;
-                    case 'CHUNK_MESSAGE':
-                        chunkMessage = null;
-                        try {
-                            chunkMessage = new ChunkMessage(parsed.id, parsed.chunk_count);
-                            console.log(Constants.APP_INFO, TAG, 'Chunk message obj', chunkMessage);
-                        } catch(e) {
-                            console.log(Constants.APP_INFO, TAG, 'Chunk message obj creation error', e);
+                case 'RESUME':
+                case 'PAUSE':
+                case 'START_SLIDESHOW':
+                case 'ADD_SLIDESHOW':
+                case 'STOP_SLIDESHOW':
+                case 'STOP_MEDIA':
+                case 'NEXT_SLIDE':
+                case 'PREVIOUS_SLIDE':
+                    event = event.toLowerCase();
+                    Utils.triggerEvent(event, parsed);
+                    break;
+                case 'CHUNK_MESSAGE':
+                    chunkMessage = null;
+                    try {
+                        chunkMessage = new ChunkMessage(parsed.id, parsed.chunk_count);
+                        console.log(Constants.APP_INFO, TAG, 'Chunk message obj', chunkMessage);
+                    } catch(e) {
+                        console.log(Constants.APP_INFO, TAG, 'Chunk message obj creation error', e);
+                    }
+                    break;
+                case 'CHUNK_PART':
+                    if (!chunkMessage) break;
+                    try {
+                        chunkMessage.addChunk(parsed.id, parsed.chunk_index, parsed.message);
+                        console.log(Constants.APP_INFO, TAG, 'Chunk message "'+ parsed.chunk_index +'" is added');
+                        if (chunkMessage.received) {
+                            var message = JSON.parse(chunkMessage.message);
+                            event = message.event && message.event.toLowerCase();
+                            console.log(Constants.APP_INFO, TAG, 'Chunk message received');
+                            Utils.triggerEvent(event, message);
                         }
-                        break;
-                    case 'CHUNK_PART':
-                        if (!chunkMessage) break;
-                        try {
-                            chunkMessage.addChunk(parsed.id, parsed.chunk_index, parsed.message);
-                            console.log(Constants.APP_INFO, TAG, 'Chunk message "'+ parsed.chunk_index +'" is added');
-                            if (chunkMessage.received) {
-                                var message = JSON.parse(chunkMessage.message);
-                                event = message.event && message.event.toLowerCase();
-                                console.log(Constants.APP_INFO, TAG, 'Chunk message received');
-                                Utils.triggerEvent(event, message);
-                            }
-                        } catch(e) {
-                            console.log(Constants.APP_INFO, TAG, 'Chunk part error', e);
-                        }
-                        break;
+                    } catch(e) {
+                        console.log(Constants.APP_INFO, TAG, 'Chunk part error', e);
+                    }
+                    break;
                 }
+/**
             } catch (event) {
                 console.log(Constants.APP_INFO, TAG, 'Parse message error: ', event);
             }
@@ -145,6 +167,16 @@ var FastCast = (function(){
 
         // initialize the CastReceiverManager with an application status message
         window.castReceiverManager.start({statusText: "Application is starting"});
+*/
+            });
+            
+        const playbackConfig = new cast.framework.PlaybackConfig();
+        playbackConfig.autoResumeDuration = 5;
+        const namespaces = {'urn:x-cast:com.verizon.smartview' : 'JSON',
+                            'urn:x-cast:verizon-cloud' : 'JSON' };
+        context.start({ playbackConfig: playbackConfig,
+                        customNamespaces:  namespaces});        
+        window.castReceiverContext = context;
         console.log(Constants.APP_INFO, TAG, 'Receiver Manager started');
 
         callback && callback();
@@ -186,6 +218,9 @@ var FastCast = (function(){
          * });
          */
         onSenderDisconnected: setCallback('disconnect'),
+
+        sendTheMessage: sendTheMessage,
+        getTheContext: getTheContext,
 
         /**
          * Register sender connect/disconnect events
